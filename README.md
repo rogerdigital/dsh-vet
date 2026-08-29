@@ -70,6 +70,10 @@ rules get re-examined and the rule set gets corrected in public.
 - **v0.3** — marketplace integrations render `dsh-vet/v1` reports; contract
   adopted by at least one third-party emitter
 
+The detailed, trackable plan — task breakdowns, recorded decisions,
+definitions of done, risks, and kill criteria — lives in
+[ROADMAP.md](ROADMAP.md).
+
 ## Develop
 
 ```sh
