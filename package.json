@@ -1,0 +1,52 @@
+{
+  "name": "dsh-vet",
+  "version": "0.0.0",
+  "description": "Security vetting for DeepSeek Harness (DSH) plugins: permission & supply-chain audits before install, graded via the open dsh-vet/v1 report standard.",
+  "type": "module",
+  "packageManager": "pnpm@10.23.0",
+  "main": "lib/index.mjs",
+  "types": "lib/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.mts",
+      "default": "./lib/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "docs"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "pack:check": "pnpm pack --pack-destination ./node_modules/.cache/pack",
+    "verify": "pnpm typecheck && pnpm test && pnpm build && pnpm pack:check",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "security",
+    "audit",
+    "supply-chain",
+    "static-analysis",
+    "vetting"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerdigital/dsh-vet.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsdown": "^0.22.14",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
+}
