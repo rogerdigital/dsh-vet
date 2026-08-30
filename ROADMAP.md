@@ -1,7 +1,8 @@
 # Roadmap & Development Plan
 
 Trackable plan; check boxes as work lands. Status of the whole document:
-**contract draft shipped (v0.0.0 scaffold), v0.1 in planning.**
+**v0.1 code complete (scanner, rules, CLI, fixtures, self-audit); remaining:
+real-plugin calibration sweep and the 0.1.0 npm release.**
 
 ## Positioning
 
@@ -25,15 +26,15 @@ engineer would call honest.
 
 ### T1 — Target resolution
 
-- [ ] `resolveTarget(specifier)` accepting `npm-package`, `local-path`, `git-repo`
-- [ ] npm tarball fetch using registry metadata only; record `version` + `integrity` into `target.resolved`
-- [ ] `local-path` mode scans a directory with zero network access
+- [x] `resolveTarget(specifier)` accepting `npm-package`, `local-path`, `git-repo`
+- [x] npm tarball fetch using registry metadata only; record `version` + `integrity` into `target.resolved`
+- [x] `local-path` mode scans a directory with zero network access
 
 ### T2 — Analysis engine
 
-- [ ] acorn-based AST pass over shipped JS (`lib/`, `bin/`), ESM + CJS
-- [ ] module graph: entry points → reachable files; unreachable code flagged separately, not ignored
-- [ ] capability model: classify Node builtins touched per file (`fs`, `child_process`, `net`/`http`, `worker_threads`, …)
+- [x] acorn-based AST pass over shipped JS (`lib/`, `bin/`), ESM + CJS
+- [x] module graph: entry points → reachable files; unreachable code flagged separately, not ignored
+- [x] capability model: classify Node builtins touched per file (`fs`, `child_process`, `net`/`http`, `worker_threads`, …)
 
 Decisions (recorded here until an `docs/adr/` directory earns its keep):
 
@@ -43,13 +44,17 @@ Decisions (recorded here until an `docs/adr/` directory earns its keep):
 - **D2 — analysis is best-effort static.** Findings that depend on runtime
   values are emitted with `low` confidence by default (they never lower a
   grade — by contract).
+- **D4 — tarballs are extracted by a hand-rolled ustar/PAX reader.** Node's
+  zlib handles the compression; the reader is ~150 guarded lines with
+  path-traversal checks and refuses to materialize links. Keeps acorn the
+  only non-Node runtime dependency (extends D1).
 
 ### T3 — Rule engine + first rule set
 
-- [ ] rule module interface: `{ id, title, defaultSeverity, defaultConfidence, check(ctx) → findings[] }`
-- [ ] `docs/rules/<id>.md` for every shipped rule — a rule without public
+- [x] rule module interface: `{ id, title, defaultSeverity, defaultConfidence, check(ctx) → findings[] }`
+- [x] `docs/rules/<id>.md` for every shipped rule — a rule without public
   rationale is undisputable, and undisputable rules are how trust tools die
-- [ ] v0.1 rule set (12–16 rules across four families):
+- [x] v0.1 rule set (12–16 rules across four families):
   - `perm.*` — injected seam inventory vs manifest/README claims; undeclared
     fs writes; subprocess spawn; network clients
   - `dep.*` — install scripts (`preinstall`/`postinstall`); unpinned ranges;
@@ -58,25 +63,36 @@ Decisions (recorded here until an `docs/adr/` directory earns its keep):
     literals; charcode chains
   - `egress.*` — outbound endpoints; endpoints reachable from
     secret-adjacent reads (`process.env`, DSH home, credential-like files)
-- [ ] severity calibration pass: conservative defaults; uncertain → lower
+- [x] severity calibration pass: conservative defaults; uncertain → lower
   severity or `low` confidence, never the reverse
+
+Decision:
+
+- **D5 — seam declarations are read from package.json `dsh.seams`.** The DSH
+  plugin ecosystem has no manifest standard yet; `dsh.seams: ["fs","web",…]`
+  is the smallest honest vocabulary. When a declaration is absent,
+  `perm.seam-mismatch` stays silent (an absent declaration is not a claim) and
+  the per-capability rules speak instead. If DSH standardizes a manifest,
+  this is the one place to change.
 
 ### T4 — CLI + output
 
-- [ ] `dsh-vet <specifier>` human summary: grade, counts, top findings with evidence
-- [ ] `--json` emits a `dsh-vet/v1` report via `createReport`
-- [ ] exit semantics per spec: `0` on any completed report, non-zero on scanner failure; `--strict` exits `1` on findings ≥ `high` with confidence ≥ `medium`
-- [ ] `--rules <ids>` filter and `--fail-on <severity>` override
+- [x] `dsh-vet <specifier>` human summary: grade, counts, top findings with evidence
+- [x] `--json` emits a `dsh-vet/v1` report via `createReport`
+- [x] exit semantics per spec: `0` on any completed report, non-zero on scanner failure; `--strict` exits `1` on findings ≥ `high` with confidence ≥ `medium`
+- [x] `--rules <ids>` filter and `--fail-on <severity>` override
 
 ### T5 — Fixture corpus + determinism
 
-- [ ] `fixtures/`: synthetic clean and offending plugins covering every rule
-- [ ] golden-report tests: same fixture → byte-identical report across runs
-- [ ] CI scans the fixture corpus on every push; drift fails the build
+- [x] `fixtures/`: synthetic clean and offending plugins covering every rule
+- [x] golden-report tests: same fixture → byte-identical report across runs
+- [x] CI scans the fixture corpus on every push; drift fails the build
 
 ### T6 — Self-audit & calibration
 
-- [ ] run the scanner on dsh-vet itself and on dsh-searxng; publish both reports under `examples/`
+- [x] run the scanner on dsh-vet itself and publish the report under
+  `examples/` (generated from the packed tarball; `pnpm self:audit`)
+- [ ] same for dsh-searxng
 - [ ] sweep ~10 real ecosystem plugins; record results; tune until zero obvious false positives
 - [ ] README Install section; publish `0.1.0` to npm
 
