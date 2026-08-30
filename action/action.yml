@@ -49,7 +49,12 @@ runs:
         if [ "${{ inputs.strict }}" = "true" ]; then args+=(--strict); fi
         if [ -n "${{ inputs.fail-on }}" ]; then args+=(--fail-on "${{ inputs.fail-on }}"); fi
         if [ -n "${{ inputs.rules }}" ]; then args+=(--rules "${{ inputs.rules }}"); fi
-        npx -y dsh-vet@${{ inputs.version }} "${args[@]}" ${{ inputs.specifier }} > .dsh-vet/report.json
+        # Isolated install instead of `npx`: when the audited repository IS a
+        # package named dsh-vet (running the action in this repo), npx resolves
+        # against the local package.json and fails to find the bin.
+        install_dir="${RUNNER_TEMP:-/tmp}/dsh-vet-action"
+        npm install --prefix "$install_dir" --no-fund --no-audit dsh-vet@${{ inputs.version }}
+        "$install_dir/node_modules/.bin/dsh-vet" "${args[@]}" ${{ inputs.specifier }} > .dsh-vet/report.json
 
     - name: Badge, summary, and PR comment
       if: always() && steps.scan.outcome != 'skipped'

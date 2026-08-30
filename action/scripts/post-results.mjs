@@ -49,7 +49,16 @@ async function upsertComment(markdown) {
 
 const summaryFile = process.env.GITHUB_STEP_SUMMARY
 const runUrl = process.env.RUN_URL ?? '(run url unavailable)'
-const report = existsSync(REPORT_PATH) ? JSON.parse(readFileSync(REPORT_PATH, 'utf8')) : null
+
+// The report file exists but may be empty (the scan redirect creates it
+// before the scanner runs); an unreadable report must degrade to the
+// did-not-complete path, never crash the step.
+let report = null
+try {
+  if (existsSync(REPORT_PATH)) report = JSON.parse(readFileSync(REPORT_PATH, 'utf8'))
+} catch {
+  report = null
+}
 
 if (!report || report.schema !== 'dsh-vet/v1') {
   const msg = `## dsh-vet report\n\nThe scan did not complete — no valid report was produced. See the [run](${runUrl}) logs for the scanner error.`
