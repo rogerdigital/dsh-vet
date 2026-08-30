@@ -1,9 +1,13 @@
-# dsh-vet self-audit via the published action. workflow_dispatch only until
-# dsh-vet@0.2.0 is on npm (the action pins the scanner version); flip to
-# push/pull_request triggers in the activation PR right after publishing.
+# dsh-vet self-audit via the published action: PR comment + report artifact
+# on every pull request, committed report + grade badge on main. The audit
+# targets the published npm artifact (specifier 'dsh-vet') rather than this
+# working tree — the fixtures in this repo are intentional offenders.
 name: dsh-vet
 
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -15,9 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: rogerdigital/dsh-vet/action@main
+      - uses: rogerdigital/dsh-vet/action@v0.2.0
         with:
-          # Audit the published artifact rather than this working tree:
-          # the fixtures in this repo are intentional offenders.
           specifier: 'dsh-vet'
           commit-report: true

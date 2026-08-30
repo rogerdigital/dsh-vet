@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { runRules } from '../src/rules/index.ts'
 import { SCANNER_VERSION, scanDirectory } from '../src/scanner.ts'
@@ -60,5 +62,19 @@ describe('scanner', () => {
     const subset = runRules(analysis, ['dep.install-scripts'])
     expect(subset.every((f) => f.id === 'dep.install-scripts')).toBe(true)
     expect(() => runRules(analysis, ['no.such-rule'])).toThrow(/unknown rule id/)
+  })
+
+  it('refuses to grade an empty audit as clean (scan.empty-audit)', async () => {
+    const empty = mkdtempSync(join(tmpdir(), 'dsh-vet-empty-'))
+    try {
+      writeFileSync(join(empty, 'package.json'), '{"name":"ts-only","main":"dist/index.js"}')
+      mkdirSync(join(empty, 'src'), { recursive: true })
+      writeFileSync(join(empty, 'src', 'index.ts'), 'export const x = 1')
+      const report = await scanDirectory(empty, { now: () => '2026-01-01T00:00:00.000Z' })
+      expect(report.summary.grade).toBe('C')
+      expect(report.findings.map((f) => f.id)).toEqual(['scan.empty-audit'])
+    } finally {
+      rmSync(empty, { recursive: true, force: true })
+    }
   })
 })

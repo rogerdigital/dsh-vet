@@ -49,7 +49,12 @@ runs:
         if [ "${{ inputs.strict }}" = "true" ]; then args+=(--strict); fi
         if [ -n "${{ inputs.fail-on }}" ]; then args+=(--fail-on "${{ inputs.fail-on }}"); fi
         if [ -n "${{ inputs.rules }}" ]; then args+=(--rules "${{ inputs.rules }}"); fi
-        npx -y dsh-vet@${{ inputs.version }} "${args[@]}" ${{ inputs.specifier }} > .dsh-vet/report.json
+        # Isolated install instead of `npx`: when the audited repository IS a
+        # package named dsh-vet (running the action in this repo), npx resolves
+        # against the local package.json and fails to find the bin.
+        install_dir="${RUNNER_TEMP:-/tmp}/dsh-vet-action"
+        npm install --prefix "$install_dir" --no-fund --no-audit dsh-vet@${{ inputs.version }}
+        "$install_dir/node_modules/.bin/dsh-vet" "${args[@]}" ${{ inputs.specifier }} > .dsh-vet/report.json
 
     - name: Badge, summary, and PR comment
       if: always() && steps.scan.outcome != 'skipped'
@@ -78,7 +83,7 @@ runs:
     - name: Commit report and badge to the default branch
       if: >-
         always() && steps.scan.outcome == 'success' && inputs.commit-report == 'true' &&
-        github.event_name == 'push' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
         github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
       shell: bash
       run: |
@@ -88,6 +93,8 @@ runs:
         if git diff --staged --quiet; then
           echo "report unchanged; nothing to commit"
         else
-          git commit -m "chore: update dsh-vet report and badge"
+          # [skip ci] is load-bearing: reports always differ (scanner.ranAt),
+          # so an ordinary commit would re-trigger workflows forever.
+          git commit -m "chore: update dsh-vet report and badge [skip ci]"
           git push
         fi

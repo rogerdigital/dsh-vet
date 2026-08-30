@@ -1,4 +1,8 @@
-import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { readFileSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderBadgeJson, renderCommentMarkdown } from '../action/scripts/render.mjs'
 import type { VetReport } from '../src/contract.ts'
@@ -53,5 +57,21 @@ describe('renderCommentMarkdown', () => {
     }
     const md = renderCommentMarkdown(empty, { runUrl: 'https://r' })
     expect(md).toContain('No findings.')
+  })
+})
+
+describe('post-results script', () => {
+  it('degrades gracefully when the report file exists but is empty', () => {
+    const script = join(dirname(fileURLToPath(import.meta.url)), '..', 'action', 'scripts', 'post-results.mjs')
+    const work = mkdtempSync(join(tmpdir(), 'dsh-vet-post-'))
+    try {
+      mkdirSync(join(work, '.dsh-vet'), { recursive: true })
+      writeFileSync(join(work, '.dsh-vet', 'report.json'), '')
+      // The scan redirect creates the file before the scanner runs; an empty
+      // report must take the did-not-complete path, never crash the step.
+      execFileSync('node', [script], { cwd: work, stdio: 'pipe' })
+    } finally {
+      rmSync(work, { recursive: true, force: true })
+    }
   })
 })

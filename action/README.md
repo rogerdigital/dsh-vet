@@ -29,9 +29,10 @@ jobs:
 Every run uploads the full `dsh-vet/v1` report as the `dsh-vet-report`
 artifact. On pull requests, findings are posted as a single comment that is
 edited in place (never one comment per push). On pushes to the default
-branch, `commit-report: true` commits `.dsh-vet/report.json` and
-`.dsh-vet/badge.json`, so the badge below always matches a report you can
-read in git history.
+branch (or a manual `workflow_dispatch`), `commit-report: true` commits
+`.dsh-vet/report.json` and `.dsh-vet/badge.json` — marked `[skip ci]`,
+because reports always differ (`scanner.ranAt`) and an ordinary commit
+would re-trigger workflows endlessly.
 
 ## Badge
 
