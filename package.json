@@ -2,10 +2,16 @@
   "name": "dsh-vet",
   "version": "0.0.0",
   "description": "Security vetting for DeepSeek Harness (DSH) plugins: permission & supply-chain audits before install, graded via the open dsh-vet/v1 report standard.",
+  "dsh": {
+    "seams": ["fs", "shell", "web"]
+  },
   "type": "module",
   "packageManager": "pnpm@10.23.0",
   "main": "lib/index.mjs",
   "types": "lib/index.d.mts",
+  "bin": {
+    "dsh-vet": "bin/dsh-vet.mjs"
+  },
   "exports": {
     ".": {
       "types": "./lib/index.d.mts",
@@ -14,6 +20,7 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "bin",
     "lib",
     "docs"
   ],
@@ -21,6 +28,8 @@
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:update-goldens": "GOLDEN_UPDATE=1 vitest run test/golden.test.ts",
+    "self:audit": "pnpm build && node scripts/self-audit.mjs",
     "pack:check": "pnpm pack --pack-destination ./node_modules/.cache/pack",
     "verify": "pnpm typecheck && pnpm test && pnpm build && pnpm pack:check",
     "prepublishOnly": "pnpm run build"
@@ -48,5 +57,8 @@
     "tsdown": "^0.22.14",
     "typescript": "^5.8.0",
     "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "acorn": "^8.18.0"
   }
 }

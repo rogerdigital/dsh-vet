@@ -1,8 +1,8 @@
 /**
  * `dsh-vet`: security vetting for DeepSeek Harness (DSH) plugins, built
- * around the open `dsh-vet/v1` report contract. This module currently ships
- * the contract's reference types and grading logic; the reference scanner
- * and CLI land in v0.1 (see the README roadmap).
+ * around the open `dsh-vet/v1` report contract. This module ships the
+ * contract's reference types and grading logic plus the reference scanner
+ * pipeline (`scan`, `scanDirectory`, `runRules`).
  *
  * @module dsh-vet
  */
@@ -29,3 +29,30 @@ export type {
   VetTargetKind,
   CreateReportInput,
 } from './contract.ts'
+
+export { analyze, reachableFrom } from './analyze.ts'
+export type {
+  Analysis,
+  Capability,
+  CapabilityUse,
+  CharcodeCall,
+  DynamicImportUse,
+  EncodedLiteral,
+  EvalUse,
+  ImportRef,
+  NetUse,
+  PkgJson,
+  SourceFile,
+} from './analyze.ts'
+
+export { classifySpecifier, parseNpmSpecifier, resolveTarget, VetError } from './resolve.ts'
+export type { ResolveOptions, ResolvedTarget, SpecifierKind } from './resolve.ts'
+
+export { RULES, ruleIds, runRules } from './rules/index.ts'
+export type { Rule, RuleContext, FindingInit } from './rule.ts'
+
+export { SCANNER_VERSION, scan, scanDirectory } from './scanner.ts'
+export type { ScanOptions } from './scanner.ts'
+
+export { runCli } from './cli.ts'
+export type { CliIo } from './cli.ts'

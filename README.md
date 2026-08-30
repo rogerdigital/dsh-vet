@@ -4,9 +4,38 @@ Security vetting for DeepSeek Harness (DSH) plugins: permission & supply-chain
 audits before install, graded via the open [`dsh-vet/v1`](docs/dsh-vet-v1.md)
 report standard.
 
-> **Status: early development.** The report contract is published as a draft;
-> the reference scanner lands in v0.1. Nothing is installable yet — watch
-> releases rather than depending on this branch.
+> **Status: early development.** The report contract is published as a draft
+> and the reference scanner + CLI are implemented; publication as `0.1.0` on
+> npm is pending the roadmap's calibration sweep.
+
+## Usage
+
+```sh
+npx dsh-vet <specifier>          # npm package, git URL, or local path
+npx dsh-vet --json <specifier>   # dsh-vet/v1 report on stdout
+npx dsh-vet --strict <specifier> # exit 1 on findings >= high (confidence >= medium)
+npx dsh-vet --rules dep.install-scripts <specifier>
+```
+
+Any completed report exits `0` — grades describe findings, they do not gate.
+Scanner failures exit non-zero. The scanner runs locally, reads the npm
+registry for dependency metadata only, and never transmits audited code.
+
+Shipped rules (each with a public rationale under
+[`docs/rules/`](docs/rules)):
+
+| Family | Rules |
+|---|---|
+| `perm.*` | seam-mismatch, undeclared-fs-write, subprocess-spawn, network-client, unreachable-files |
+| `dep.*` | install-scripts, floating-range, typosquat-proximity |
+| `obf.*` | eval-detect, dynamic-require, encoded-payload, charcode-chain, unparseable |
+| `egress.*` | outbound-endpoints, secret-adjacent |
+
+dsh-vet audits itself with the same scanner:
+[`examples/dsh-vet.report.json`](examples/dsh-vet.report.json) is generated
+from the exact tarball that ships (`npm pack` → scan), seams declared in
+package.json. It is not an A-by-cheating report — every signal the scanner
+finds in itself is in there.
 
 ## Why
 
