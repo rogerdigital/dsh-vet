@@ -78,7 +78,7 @@ runs:
     - name: Commit report and badge to the default branch
       if: >-
         always() && steps.scan.outcome == 'success' && inputs.commit-report == 'true' &&
-        github.event_name == 'push' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
         github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
       shell: bash
       run: |
@@ -88,6 +88,8 @@ runs:
         if git diff --staged --quiet; then
           echo "report unchanged; nothing to commit"
         else
-          git commit -m "chore: update dsh-vet report and badge"
+          # [skip ci] is load-bearing: reports always differ (scanner.ranAt),
+          # so an ordinary commit would re-trigger workflows forever.
+          git commit -m "chore: update dsh-vet report and badge [skip ci]"
           git push
         fi
