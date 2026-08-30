@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.1
 
 - New rule `scan.empty-audit` (medium/high): a scan that found zero
   analyzable JavaScript files reports it instead of grading A by vacuity.
