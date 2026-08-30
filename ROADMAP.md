@@ -1,8 +1,9 @@
 # Roadmap & Development Plan
 
 Trackable plan; check boxes as work lands. Status of the whole document:
-**v0.1 complete except the npm release itself (calibration swept
-[docs/calibration-v0.1.md](docs/calibration-v0.1.md); publish 0.1.0 to close).**
+**v0.1 shipped — `dsh-vet@0.1.0` is live on npm. Next: v0.2 author-side
+distribution; the kill-criteria clock (2–3 weeks of adoption observation)
+started at release.**
 
 ## Positioning
 
@@ -96,7 +97,7 @@ Decision:
 - [x] sweep ~10 real ecosystem plugins; record results; tune until zero obvious false positives
   (11 packages, `examples/sweep/` + `docs/calibration-v0.1.md`; two tunings applied)
 - [x] README Install section
-- [ ] publish `0.1.0` to npm
+- [x] publish `0.1.0` to npm
 
 **Definition of done:** every box above checked; deterministic audits of
 arbitrary npm DSH plugins; results defensible on 10 real plugins; rule docs
