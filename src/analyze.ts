@@ -493,8 +493,12 @@ function inspectFile(analysis: Analysis, file: SourceFile, ast: Node): void {
         if (typeof value === 'string' && value.length >= 48 && !/\s/.test(value)) {
           if (/^[A-Za-z0-9+/=]+$/.test(value) && /\d/.test(value) && /[A-Z]/.test(value)) {
             analysis.encodedLiterals.push({ file: file.path, line, value, charset: 'base64' })
-          } else if (/^[0-9a-fA-F]+$/.test(value) && value.length >= 48) {
-            analysis.encodedLiterals.push({ file: file.path, line, value, charset: 'hex' })
+          } else if (/^[0-9a-fA-F]+$/.test(value)) {
+            // Palettes and tables reuse a handful of hex digits; encoded
+            // payloads use the alphabet broadly. Calibrated on the v0.1
+            // ecosystem sweep (docs/calibration-v0.1.md).
+            const distinct = new Set(value).size
+            if (distinct >= 8) analysis.encodedLiterals.push({ file: file.path, line, value, charset: 'hex' })
           }
         }
         break

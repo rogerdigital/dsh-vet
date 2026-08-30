@@ -1,0 +1,159 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "dsh-zcf@0.5.3",
+    "resolved": {
+      "version": "0.5.3",
+      "integrity": "sha512-RoArVPwzjMWHgm6Pp9wDZycvr+X9c+ypLX6H9VXLyeM03+JeF6v59xHWlumq9oCmWlUqGndGt3t2288bwXXiEQ=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:34:24.351Z"
+  },
+  "summary": {
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 3,
+      "low": 0,
+      "info": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.secret-adjacent",
+      "title": "Network calls reachable from code that reads secrets",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/bin.js",
+          "line": 26,
+          "snippet": "return join(homedir(), DSH_HOME_DIR_NAME);",
+          "note": "reads the user home directory; fetch in lib/bin.js:824 is statically reachable from here"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 34,
+          "snippet": "if (path === \"~\") return homedir();",
+          "note": "reads the user home directory; fetch in lib/bin.js:824 is statically reachable from here"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 26,
+          "snippet": "return join(homedir(), DSH_HOME_DIR_NAME);",
+          "note": "reads the user home directory; fetch in lib/bin.js:919 is statically reachable from here"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 34,
+          "snippet": "if (path === \"~\") return homedir();",
+          "note": "reads the user home directory; fetch in lib/bin.js:919 is statically reachable from here"
+        }
+      ],
+      "remediation": "Keep secret reads and network clients in separate modules, or document the intended data flow for each endpoint.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.secret-adjacent.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/bin.js",
+          "line": 824,
+          "snippet": "if (!(await fetch(`${url}/-/ping`, { signal: AbortSignal.timeout(PROBE_TIMEOUT_MS) })).ok) return void 0;",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 919,
+          "snippet": "const response = await fetch(`${base.replace(/\\/$/, \"\")}/models`, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.subprocess-spawn",
+      "title": "Spawns subprocesses",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/bin.js",
+          "line": 763,
+          "snippet": "return spawnSync(command, [...args], { stdio: \"inherit\" }).status ?? 1;",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 766,
+          "snippet": "const result = spawnSync(command, [...args], {",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 861,
+          "snippet": "const child = spawn(pm, [...args], { stdio: [",
+          "note": "no \"shell\" seam declared"
+        }
+      ],
+      "remediation": "Declare the shell seam in dsh.seams, or avoid spawning processes.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.subprocess-spawn.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/bin.js",
+          "line": 1754,
+          "snippet": "await writeFile(temp, content, {"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 1758,
+          "snippet": "await rename(temp, filename);"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 1760,
+          "snippet": "await rm(temp, { force: true });"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 1795,
+          "snippet": "await writeFile(lockPath, `${process.pid}\\n`, {"
+        },
+        {
+          "file": "lib/bin.js",
+          "line": 1810,
+          "snippet": "await rm(lockPath, { force: true });"
+        },
+        {
+          "file": ".",
+          "note": "…and 4 more"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    }
+  ]
+}

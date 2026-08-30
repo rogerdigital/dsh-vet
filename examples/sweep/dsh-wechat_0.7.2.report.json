@@ -1,0 +1,123 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "dsh-wechat@0.7.2",
+    "resolved": {
+      "version": "0.7.2",
+      "integrity": "sha512-Cd7Bj5nOWmWlCfKn1xOS4HqqsoJnlIAEHN+EmwT2enSs3hkfnmm2kh6x8glir0z1y8sqaNiNF1R8AEL9ghXTkQ=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:34:30.803Z"
+  },
+  "summary": {
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 0,
+      "info": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "dist/client.js",
+          "line": 91,
+          "snippet": "return fetch(\"/wechat/api\" + path, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "dist/weixin/api.js",
+          "line": 129,
+          "snippet": "const res = await fetch(url, { headers: buildHeaders({ token }) });",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "dist/weixin/api.js",
+          "line": 160,
+          "snippet": "const res = await fetch(url, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "dist/weixin/media.js",
+          "line": 41,
+          "snippet": "const res = await fetch(url);",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "dist/weixin/media.js",
+          "line": 56,
+          "snippet": "const res = await fetch(url, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "dist/adapter/inbound.js",
+          "line": 18,
+          "snippet": "fs.writeFileSync(filePath, buffer);"
+        },
+        {
+          "file": "dist/bridge/bridge.js",
+          "line": 726,
+          "snippet": "fs.unlinkSync(tokenPath);"
+        },
+        {
+          "file": "dist/state.js",
+          "line": 87,
+          "snippet": "fs.renameSync(tempPath, this.filePath);"
+        },
+        {
+          "file": "dist/state.js",
+          "line": 92,
+          "snippet": "fs.unlinkSync(tempPath);"
+        },
+        {
+          "file": "dist/weixin/monitor.js",
+          "line": 54,
+          "snippet": "fs.unlinkSync(p);"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    },
+    {
+      "id": "perm.unreachable-files",
+      "title": "Shipped files not reachable from any declared entry point",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "dist/dsh/types.js",
+          "note": "no static import path from any entry point reaches this file"
+        }
+      ],
+      "remediation": "Dead files still ship and can be required dynamically; delete them or wire them into the graph.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.unreachable-files.md"
+      ]
+    }
+  ]
+}

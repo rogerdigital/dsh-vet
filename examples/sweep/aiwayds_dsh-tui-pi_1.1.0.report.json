@@ -1,0 +1,207 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "@aiwayds/dsh-tui-pi@1.1.0",
+    "resolved": {
+      "version": "1.1.0",
+      "integrity": "sha512-2+KtruQ3bXFpcxJtNMVpwPgdRsTgqbvrDKui+dL05UpdG4wW/bko7R6euvuHV5OixxRhdrUVhWO2A4CII38UgA=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:45:44.716Z"
+  },
+  "summary": {
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 3,
+      "low": 0,
+      "info": 2
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.secret-adjacent",
+      "title": "Network calls reachable from code that reads secrets",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 109,
+          "snippet": "for (const candidate of [process.env.PYTHON ?? 'python3']) {",
+          "note": "reads process.env; fetch in assets/fonts-gen.mjs:96 is statically reachable from here"
+        }
+      ],
+      "remediation": "Keep secret reads and network clients in separate modules, or document the intended data flow for each endpoint.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.secret-adjacent.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 96,
+          "snippet": "const res = await fetch(url)",
+          "note": "no \"web\" seam declared (target not statically known)"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.subprocess-spawn",
+      "title": "Spawns subprocesses",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 104,
+          "snippet": "return execFileSync(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', ...opts })",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 111,
+          "snippet": "execFileSync(candidate, ['-c', 'import fontTools'], { stdio: 'ignore' })",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/clipboard.js",
+          "line": 51,
+          "snippet": "const child = execFileCb(file, [...args], options, (error, stdout) => {",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/git.js",
+          "line": 32,
+          "snippet": "execFile('git', ['-C', this.cwd, 'rev-parse', '--abbrev-ref', 'HEAD'], { timeout: 2000 }, (error, stdout) => {",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/remote-tail.js",
+          "line": 33,
+          "snippet": "execFile('zstd', ['-dc', file], { maxBuffer: 1 << 30 }, (error, stdout) => {",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": ".",
+          "note": "…and 7 more"
+        }
+      ],
+      "remediation": "Declare the shell seam in dsh.seams, or avoid spawning processes.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.subprocess-spawn.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 98,
+          "snippet": "writeFileSync(dest, Buffer.from(await res.arrayBuffer()))"
+        },
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 134,
+          "snippet": "writeFileSync(join(work, 'LICENSE-Hack.txt'), readFileSync(join(work, 'hack', 'LICENSE.md')))"
+        },
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 141,
+          "snippet": "writeFileSync(preparePy, `"
+        },
+        {
+          "file": "assets/fonts-gen.mjs",
+          "line": 180,
+          "snippet": "writeFileSync(renamePy, `"
+        },
+        {
+          "file": "lib/agent-manager.js",
+          "line": 56,
+          "snippet": "writeFileSync(join(targetDir, entry.name), readFileSync(join(legacyDir, entry.name)));"
+        },
+        {
+          "file": ".",
+          "note": "…and 37 more"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    },
+    {
+      "id": "perm.subprocess-spawn",
+      "title": "Imports child_process without spawning anything",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/font-detect.js",
+          "note": "import present, no spawn/exec call site found"
+        },
+        {
+          "file": "lib/log-repair.js",
+          "note": "import present, no spawn/exec call site found"
+        }
+      ],
+      "remediation": "Remove the unused import.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.subprocess-spawn.md"
+      ]
+    },
+    {
+      "id": "perm.unreachable-files",
+      "title": "Shipped files not reachable from any declared entry point",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "assets/fonts-gen.mjs",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "assets/whale-gen.mjs",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "scripts/dev-upgrade.mjs",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "scripts/install-font.mjs",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "scripts/link-dsh-closure.mjs",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "scripts/repair-session-log.mjs",
+          "note": "no static import path from any entry point reaches this file"
+        }
+      ],
+      "remediation": "Dead files still ship and can be required dynamically; delete them or wire them into the graph.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.unreachable-files.md"
+      ]
+    }
+  ]
+}

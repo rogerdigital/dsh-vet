@@ -1,0 +1,80 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "@linxin666/dsh-live-stats@0.1.20",
+    "resolved": {
+      "version": "0.1.20",
+      "integrity": "sha512-rytpCxbsPdOp2Ba6mbHb+cgwoodaPJIUEWe5kZll4MjzPAwtHIU2PtLFrKhlJuvX/Dog4k1rG4WGJuew/6OCCw=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:45:41.876Z"
+  },
+  "summary": {
+    "grade": "A",
+    "counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "info": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "perm.unreachable-files",
+      "title": "Shipped files not reachable from any declared entry point",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/types/client/LiveStatsSettingsCard.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/client/PluginSettingsCard.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/client/TpsLine.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/client/index.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/client/locales.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/client/merge-css.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/client/settings-form.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/estimator.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/index.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/types/invariant.js",
+          "note": "no static import path from any entry point reaches this file"
+        }
+      ],
+      "remediation": "Dead files still ship and can be required dynamically; delete them or wire them into the graph.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.unreachable-files.md"
+      ]
+    }
+  ]
+}

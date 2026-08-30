@@ -1,0 +1,237 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "dsh-better-sidebar@0.17.1",
+    "resolved": {
+      "version": "0.17.1",
+      "integrity": "sha512-7me2X6w+ecbzAMEHtuWkSPUrfLDLTBvL9qugzgBbg1FyWyy2dzS9QNDvnZjjkst4kr4LjUJTTG4rsXBcz41YzQ=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:45:39.719Z"
+  },
+  "summary": {
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 4,
+      "low": 0,
+      "info": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.secret-adjacent",
+      "title": "Network calls reachable from code that reads secrets",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/client-editor.js",
+          "line": 19076,
+          "snippet": "const verbose = typeof process != \"undefined\" && process.env && /\\bparse\\b/.test(process.env.LOG);",
+          "note": "reads process.env; fetch in lib/client-editor.js:17958 is statically reachable from here"
+        },
+        {
+          "file": "lib/client-editor.js",
+          "line": 19076,
+          "snippet": "const verbose = typeof process != \"undefined\" && process.env && /\\bparse\\b/.test(process.env.LOG);",
+          "note": "reads process.env; fetch in lib/client-editor.js:17987 is statically reachable from here"
+        },
+        {
+          "file": "lib/client-editor.js",
+          "line": 19076,
+          "snippet": "const verbose = typeof process != \"undefined\" && process.env && /\\bparse\\b/.test(process.env.LOG);",
+          "note": "reads process.env; fetch in lib/client-editor.js:44601 is statically reachable from here"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 980,
+          "snippet": "...process.env,",
+          "note": "reads process.env; fetch in lib/index.js:4052 is statically reachable from here"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 1383,
+          "snippet": "const home = process.env.DSH_HOME !== void 0 && process.env.DSH_HOME.trim() !== \"\" ? process.env.DSH_HOME : join(homedir",
+          "note": "reads the user home directory; fetch in lib/index.js:4052 is statically reachable from here"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 980,
+          "snippet": "...process.env,",
+          "note": "reads process.env; fetch in lib/index.js:4059 is statically reachable from here"
+        },
+        {
+          "file": ".",
+          "note": "…and 3 more"
+        }
+      ],
+      "remediation": "Keep secret reads and network clients in separate modules, or document the intended data flow for each endpoint.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.secret-adjacent.md"
+      ]
+    },
+    {
+      "id": "obf.encoded-payload",
+      "title": "Long base64/hex string literals in shipped code",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/client-mermaid.js",
+          "line": 41186,
+          "snippet": "4e79a7f28e2ce1575976b7b259a14fedc949af7aa1ff9da79c755fbab0ab",
+          "note": "hex literal, 60 chars"
+        }
+      ],
+      "remediation": "Decode payloads to plain assets, or ship them as files a reviewer can open.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/obf.encoded-payload.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/client-editor.js",
+          "line": 17958,
+          "snippet": "response = await fetch(`/sidebar/api/${method}`, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/client-editor.js",
+          "line": 17987,
+          "snippet": "response = await fetch(`/sidebar/upload?${params.toString()}`, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/client-editor.js",
+          "line": 44601,
+          "snippet": "const etag = (await fetch(CHUNK_URL(name), {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/client-registry.js",
+          "line": 1906,
+          "snippet": "const etag = (await fetch(CHUNK_URL(name), {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/client-registry.js",
+          "line": 1976,
+          "snippet": "const etag = (await fetch(CHUNK_URL(name), {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": ".",
+          "note": "…and 18 more"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.subprocess-spawn",
+      "title": "Spawns subprocesses",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/index.js",
+          "line": 863,
+          "snippet": "const child = spawn(spec.command, spec.args, {",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 972,
+          "snippet": "const child = spawn(\"git\", full, {",
+          "note": "no \"shell\" seam declared"
+        }
+      ],
+      "remediation": "Declare the shell seam in dsh.seams, or avoid spawning processes.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.subprocess-spawn.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/index.js",
+          "line": 418,
+          "snippet": "const stream = createWriteStream(tmp, { flags: \"wx\" });"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 439,
+          "snippet": "await rename(tmp, safeTarget);"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 447,
+          "snippet": "await rm(tmp, { force: true }).catch(() => {});"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 1474,
+          "snippet": "for (const helper of candidates) if (existsSync(helper)) chmodSync(helper, 493);"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 3914,
+          "snippet": "await rename(tmp, path);"
+        },
+        {
+          "file": ".",
+          "note": "…and 1 more"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    },
+    {
+      "id": "perm.unreachable-files",
+      "title": "Shipped files not reachable from any declared entry point",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/client-editor.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/client-mermaid.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/client-registry.js",
+          "note": "no static import path from any entry point reaches this file"
+        },
+        {
+          "file": "lib/client-terminal.js",
+          "note": "no static import path from any entry point reaches this file"
+        }
+      ],
+      "remediation": "Dead files still ship and can be required dynamically; delete them or wire them into the graph.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.unreachable-files.md"
+      ]
+    }
+  ]
+}

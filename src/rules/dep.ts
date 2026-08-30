@@ -57,17 +57,22 @@ export const floatingRange: Rule = {
 }
 
 /**
- * Popular `dsh-*` names worth impersonating. Seeded from the ecosystem tools
- * this project's README compares against; extend as adoption grows.
+ * Popular `dsh-*` names worth impersonating. Every entry is verified to exist
+ * on npm (checked during the v0.1 calibration sweep,
+ * docs/calibration-v0.1.md); a name that cannot be installed cannot be
+ * typosquatted. Extend as adoption grows.
  */
 const POPULAR_NAMES = [
   'dsh-doctor',
   'dsh-plugin-audit',
   'dsh-plugin-vetting',
-  'dsh-ankh-guard',
   'dsh-audit',
   'dsh-searxng',
   'dsh-vault',
+  'dsh-zcf',
+  'dsh-wechat',
+  'dsh-better-sidebar',
+  'dsh-find-plugin',
 ]
 
 export const typosquatProximity: Rule = {

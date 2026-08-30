@@ -1,0 +1,199 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "@linxin666/dsh-doctor@0.3.6",
+    "resolved": {
+      "version": "0.3.6",
+      "integrity": "sha512-lPGhyK1Duh0kEnt4DY7BS5VeWjIlU6sahb24fTRDmZA49E1zXkg8ELaZDhjl7TqDNq/UBfBV4yG7cBckgQWGoQ=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:34:22.727Z"
+  },
+  "summary": {
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 3,
+      "low": 0,
+      "info": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.secret-adjacent",
+      "title": "Network calls reachable from code that reads secrets",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/cli.mjs",
+          "line": 192,
+          "snippet": "const env = options.env ?? process.env;",
+          "note": "reads process.env; fetch in lib/cli.mjs:177 is statically reachable from here"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 447,
+          "snippet": "function findRealDsh(env = process.env, self = process.argv[1]) {",
+          "note": "reads process.env; fetch in lib/cli.mjs:177 is statically reachable from here"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 192,
+          "snippet": "const env = options.env ?? process.env;",
+          "note": "reads process.env; fetch in lib/cli.mjs:391 is statically reachable from here"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 447,
+          "snippet": "function findRealDsh(env = process.env, self = process.argv[1]) {",
+          "note": "reads process.env; fetch in lib/cli.mjs:391 is statically reachable from here"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 192,
+          "snippet": "const env = options.env ?? process.env;",
+          "note": "reads process.env; fetch in lib/recover-CmqlhwlI.mjs:2115 is statically reachable from here"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 447,
+          "snippet": "function findRealDsh(env = process.env, self = process.argv[1]) {",
+          "note": "reads process.env; fetch in lib/recover-CmqlhwlI.mjs:2115 is statically reachable from here"
+        },
+        {
+          "file": ".",
+          "note": "…and 3 more"
+        }
+      ],
+      "remediation": "Keep secret reads and network clients in separate modules, or document the intended data flow for each endpoint.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.secret-adjacent.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/cli.mjs",
+          "line": 177,
+          "snippet": "const fetchImpl = deps.fetch ?? (async (url) => await fetch(url, { signal: AbortSignal.timeout(REGISTRY_TIMEOUT_MS) }));",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 391,
+          "snippet": "if (endpoint.startsWith(\"http://\") || endpoint.startsWith(\"https://\")) return await (await fetch(endpoint, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/client.js",
+          "line": 3342,
+          "snippet": "fetch(ENDPOINT, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 117,
+          "snippet": "if (endpoint.startsWith(\"http://\") || endpoint.startsWith(\"https://\")) return await (await fetch(endpoint, {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        },
+        {
+          "file": "lib/recover-CmqlhwlI.mjs",
+          "line": 2115,
+          "snippet": "const response = await fetch(url, { signal: AbortSignal.timeout(opts.timeoutMs) });",
+          "note": "no \"web\" seam declared (target not statically known)"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.subprocess-spawn",
+      "title": "Spawns subprocesses",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/cli.mjs",
+          "line": 57,
+          "snippet": "return spawn(spec.command, spec.args, {",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 629,
+          "snippet": "const child = spawn(command, args, {",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 1276,
+          "snippet": "const child = spawn(command[0], command.slice(1), { stdio: \"inherit\" });",
+          "note": "no \"shell\" seam declared"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 494,
+          "snippet": "child = spawn(command, args, {",
+          "note": "no \"shell\" seam declared"
+        }
+      ],
+      "remediation": "Declare the shell seam in dsh.seams, or avoid spawning processes.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.subprocess-spawn.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/cli.mjs",
+          "line": 378,
+          "snippet": "await writeFile(path, token, {"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 382,
+          "snippet": "await chmod(path, 384).catch(() => {});"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 594,
+          "snippet": "await cp(from, to);"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 595,
+          "snippet": "await chmod(to, 384);"
+        },
+        {
+          "file": "lib/cli.mjs",
+          "line": 622,
+          "snippet": "await rm(join(rescueHome, rel), { force: true });"
+        },
+        {
+          "file": ".",
+          "note": "…and 27 more"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    }
+  ]
+}

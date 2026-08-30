@@ -1,0 +1,78 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "@mlgbnb/dsh-archive-manager@1.0.7",
+    "resolved": {
+      "version": "1.0.7",
+      "integrity": "sha512-OvdrCOJN+gm9VAHvm1B0LNdf1xaRP8uOQ98qSQsstXMVqSa2jXw899P8S8hb153GgEFT9gkd6W4ZT0byjonzjg=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:34:25.758Z"
+  },
+  "summary": {
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 0,
+      "info": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/client.js",
+          "line": 171,
+          "snippet": "return fetch(url, options).then(function (res) {",
+          "note": "no \"web\" seam declared (target not statically known)"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/index.js",
+          "line": 69,
+          "snippet": "writeFileSync(tmp, JSON.stringify(data, null, 2) + '\\n', { encoding: 'utf8', mode: 0o600 })"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 70,
+          "snippet": "renameSync(tmp, filePath)"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 121,
+          "snippet": "rmSync(targetDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 141,
+          "snippet": "rmSync(parentDir, { recursive: true, force: true })"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    }
+  ]
+}
