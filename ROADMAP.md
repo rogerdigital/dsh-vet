@@ -1,8 +1,8 @@
 # Roadmap & Development Plan
 
 Trackable plan; check boxes as work lands. Status of the whole document:
-**v0.2 shipped — action green and badges live in two repos. Next: publish
-0.2.1 (`scan.empty-audit`), then v0.3 ecosystem adoption.**
+**v0.2 shipped (`0.2.1` on npm, tag `v0.2.1`); action green and badges
+live in two repos. Next: v0.3 ecosystem adoption.**
 
 ## Positioning
 
