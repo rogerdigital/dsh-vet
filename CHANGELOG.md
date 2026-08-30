@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- New rule `scan.empty-audit` (medium/high): a scan that found zero
+  analyzable JavaScript files reports it instead of grading A by vacuity.
+  Found live during v0.2 activation — a TypeScript source tree scanned as a
+  local path audits nothing while the badge reads green.
+
 ## 0.2.0
 
 Author-side distribution (ROADMAP v0.2): plugin authors self-audit in CI
