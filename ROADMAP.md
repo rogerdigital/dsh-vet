@@ -1,8 +1,8 @@
 # Roadmap & Development Plan
 
 Trackable plan; check boxes as work lands. Status of the whole document:
-**v0.2 built (badge command + composite action + wiring PRs); activation is
-gated on publishing `0.2.0` to npm — see the v0.2 section notes.**
+**v0.2 shipped — action green and badges live in two repos. Next: publish
+0.2.1 (`scan.empty-audit`), then v0.3 ecosystem adoption.**
 
 ## Positioning
 
@@ -102,30 +102,29 @@ Decision:
 arbitrary npm DSH plugins; results defensible on 10 real plugins; rule docs
 complete; self-audited in public.
 
-## v0.2 — Author-side distribution
+## v0.2 — shipped (`dsh-vet@0.2.0` on npm, tag `v0.2.0`)
 
 **Goal:** plugin authors self-audit in CI and publish their grade.
 
 - [x] GitHub Action: scan on push/PR, upload report artifact, comment findings on PRs
-  (`action/` — composite steps, pinned scanner from npm, tested render layer)
-- [ ] committed `.dsh-vet/report.json` + shields.io endpoint badge
+  (`action/` — composite steps, isolated scanner install, tested render layer)
+- [x] committed `.dsh-vet/report.json` + shields.io endpoint badge
   (**D3 — zero-server badge**: the badge reads a report committed to the
   repo, so its value is auditable through git history; no badge service to
-  run or trust) — mechanism built (`dsh-vet badge` + action); the committed
-  reports land with the first post-publish run in each repo
-- [ ] action wired up in this repo and in dsh-searxng
-  (workflow added here as `workflow_dispatch`-only until `0.2.0` is on npm;
-  dsh-searxng wiring PR opened as draft with the same gate)
-- [ ] npm `0.2.x`
+  run or trust) — live in this repo (grade A, published-artifact self-audit)
+  and in dsh-searxng (grade C: one undeclared `web` seam, by design honest)
+- [x] action wired up in this repo and in dsh-searxng — green in both
+- [x] npm `0.2.x`
 
-**Activation sequence** (why boxes 2–3 are open): the action pins
-`dsh-vet@0.2.0`, which must exist on npm before any workflow can go green —
-publish, then flip this repo's workflow to `push`/`pull_request`, merge the
-dsh-searxng wiring PR, and dispatch once in each repo to land the committed
-reports and badges.
+Activation found and fixed two action defects (recorded in the PR #6
+history): report commits looped without `[skip ci]`, and `npx` was
+hijacked by an audited repo whose own package.json shares the scanner's
+name. It also surfaced the `scan.empty-audit` rule (Unreleased → 0.2.1):
+a TypeScript source tree scanned as `.` audits nothing and must not grade
+A by vacuity.
 
 **Definition of done:** action green on two real repos; badges render and
-match their reports.
+match their reports. ✓
 
 ## v0.3 — Ecosystem adoption + contract freeze
 
