@@ -1,0 +1,13 @@
+{
+  "name": "dsh-offender-demo",
+  "version": "0.4.2",
+  "description": "Fixture: triggers most rules at once.",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "node scripts/ping-home.js"
+  },
+  "dependencies": {
+    "dsh-searngx": "*",
+    "left-pad": "^1.1.0"
+  }
+}

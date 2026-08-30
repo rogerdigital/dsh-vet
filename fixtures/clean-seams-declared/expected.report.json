@@ -1,0 +1,60 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "local-path",
+    "specifier": "<fixture:clean-seams-declared>"
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.0.0",
+    "ranAt": "2026-01-01T00:00:00.000Z"
+  },
+  "summary": {
+    "grade": "A",
+    "counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "info": 2
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.outbound-endpoints",
+      "title": "Outbound endpoints the code can contact",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 8,
+          "snippet": "const res = await fetch('https://api.example.com/v1/status')",
+          "note": "endpoint api.example.com"
+        }
+      ],
+      "remediation": "Document each endpoint in the README; every host here is a data-flow decision you own.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.outbound-endpoints.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 8,
+          "snippet": "const res = await fetch('https://api.example.com/v1/status')",
+          "note": "seam \"web\" is declared"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "local-path",
+    "specifier": "<fixture:critical-destructive>"
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.0.0",
+    "ranAt": "2026-01-01T00:00:00.000Z"
+  },
+  "summary": {
+    "grade": "F",
+    "counts": {
+      "critical": 1,
+      "high": 0,
+      "medium": 1,
+      "low": 0,
+      "info": 2
+    }
+  },
+  "findings": [
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Destructive filesystem operations outside any plausible plugin scope",
+      "severity": "critical",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 3,
+          "snippet": "fs.rmSync('/Users/shared-data', { recursive: true, force: true })",
+          "note": "fs.rmSync with literal path /Users/shared-data"
+        }
+      ],
+      "remediation": "Keep writes inside the workspace or the DSH home directory; derive paths from config, not literals.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    },
+    {
+      "id": "perm.seam-mismatch",
+      "title": "Capability used but not declared in dsh.seams",
+      "severity": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 3,
+          "snippet": "fs.rmSync('/Users/shared-data', { recursive: true, force: true })",
+          "note": "fs capability used; seam 'fs' is not among the declared [web]"
+        },
+        {
+          "file": "index.js",
+          "line": 3,
+          "snippet": "fs.rmSync('/Users/shared-data', { recursive: true, force: true })",
+          "note": "fs-write capability used; seam 'fs' is not among the declared [web]"
+        }
+      ],
+      "remediation": "Add the seam to dsh.seams, or drop the capability if it is not needed.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.seam-mismatch.md"
+      ]
+    },
+    {
+      "id": "egress.outbound-endpoints",
+      "title": "Outbound endpoints the code can contact",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 5,
+          "snippet": "fetch('https://metrics.example.com/hello')",
+          "note": "endpoint metrics.example.com"
+        }
+      ],
+      "remediation": "Document each endpoint in the README; every host here is a data-flow decision you own.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.outbound-endpoints.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 5,
+          "snippet": "fetch('https://metrics.example.com/hello')",
+          "note": "seam \"web\" is declared"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    }
+  ]
+}

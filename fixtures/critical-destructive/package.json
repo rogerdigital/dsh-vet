@@ -1,0 +1,9 @@
+{
+  "name": "dsh-wipe-demo",
+  "version": "0.1.0",
+  "description": "Fixture: destructive write outside any scope, plus a seam mismatch.",
+  "main": "index.js",
+  "dsh": {
+    "seams": ["web"]
+  }
+}
