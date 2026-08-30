@@ -12,7 +12,7 @@ import type { VetReport } from './contract.ts'
 import { runRules } from './rules/index.ts'
 
 /** Kept in lockstep with package.json; a test asserts they match. */
-export const SCANNER_VERSION = '0.1.0'
+export const SCANNER_VERSION = '0.2.0'
 
 export interface ScanOptions extends ResolveOptions {
   /** Injectable clock for deterministic tests/reports. */

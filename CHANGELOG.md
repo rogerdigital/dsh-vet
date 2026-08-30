@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0
+
+Author-side distribution (ROADMAP v0.2): plugin authors self-audit in CI
+and publish their grade.
+
+- `dsh-vet badge <report.json>` renders a shields.io endpoint badge from a
+  dsh-vet/v1 report (grade → color; `X` marks a failed scan).
+- GitHub Action under `action/` (composite, fully readable): pinned scanner
+  from npm, report artifact on every run, edited-in-place PR findings
+  comment, and optional commit of `.dsh-vet/report.json` + `badge.json` on
+  the default branch — the zero-server badge (D3).
+- README CI & badge documentation; `action/README.md` with inputs and badge
+  snippets.
+
 ## 0.1.0
 
 First scanner release. The `dsh-vet/v1` report contract (draft since the

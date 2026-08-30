@@ -1,9 +1,8 @@
 # Roadmap & Development Plan
 
 Trackable plan; check boxes as work lands. Status of the whole document:
-**v0.1 shipped — `dsh-vet@0.1.0` is live on npm. Next: v0.2 author-side
-distribution; the kill-criteria clock (2–3 weeks of adoption observation)
-started at release.**
+**v0.2 built (badge command + composite action + wiring PRs); activation is
+gated on publishing `0.2.0` to npm — see the v0.2 section notes.**
 
 ## Positioning
 
@@ -19,7 +18,7 @@ Explicit non-goals — these belong to existing tools and stay theirs:
 - ecosystem-wide catalog scoring (`dsh-audit` territory)
 - being a marketplace
 
-## v0.1 — Reference scanner + CLI
+## v0.1 — shipped (`dsh-vet@0.1.0` on npm, tag `v0.1.0`)
 
 **Goal:** `npx dsh-vet <specifier>` deterministically audits any
 npm-installable DSH plugin and emits a `dsh-vet/v1` report that a careful
@@ -107,13 +106,23 @@ complete; self-audited in public.
 
 **Goal:** plugin authors self-audit in CI and publish their grade.
 
-- [ ] GitHub Action: scan on push/PR, upload report artifact, comment findings on PRs
+- [x] GitHub Action: scan on push/PR, upload report artifact, comment findings on PRs
+  (`action/` — composite steps, pinned scanner from npm, tested render layer)
 - [ ] committed `.dsh-vet/report.json` + shields.io endpoint badge
   (**D3 — zero-server badge**: the badge reads a report committed to the
   repo, so its value is auditable through git history; no badge service to
-  run or trust)
+  run or trust) — mechanism built (`dsh-vet badge` + action); the committed
+  reports land with the first post-publish run in each repo
 - [ ] action wired up in this repo and in dsh-searxng
+  (workflow added here as `workflow_dispatch`-only until `0.2.0` is on npm;
+  dsh-searxng wiring PR opened as draft with the same gate)
 - [ ] npm `0.2.x`
+
+**Activation sequence** (why boxes 2–3 are open): the action pins
+`dsh-vet@0.2.0`, which must exist on npm before any workflow can go green —
+publish, then flip this repo's workflow to `push`/`pull_request`, merge the
+dsh-searxng wiring PR, and dispatch once in each repo to land the committed
+reports and badges.
 
 **Definition of done:** action green on two real repos; badges render and
 match their reports.

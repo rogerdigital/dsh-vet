@@ -51,6 +51,25 @@ from the exact tarball that ships (`npm pack` → scan), seams declared in
 package.json. It is not an A-by-cheating report — every signal the scanner
 finds in itself is in there.
 
+## CI & badge for plugin authors
+
+Audit your plugin on every push and PR, and publish your grade from the
+report committed to your repository — shields.io reads the badge straight
+from your repo, so its value is auditable through git history and no badge
+service is involved:
+
+```yaml
+- uses: rogerdigital/dsh-vet/action@v0.2.0
+  with:
+    specifier: '.'
+    commit-report: true
+```
+
+Every run uploads the full report as an artifact; PRs get a single
+edited-in-place findings comment. Badge snippet and all inputs:
+[`action/README.md`](action/README.md). The `dsh-vet badge <report.json>`
+command renders the shields endpoint JSON if you wire CI yourself.
+
 ## Why
 
 DSH's everything-is-a-plugin architecture is its greatest strength and its
