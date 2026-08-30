@@ -22,4 +22,5 @@ jobs:
       - uses: rogerdigital/dsh-vet/action@v0.2.0
         with:
           specifier: 'dsh-vet'
+          version: '0.2.1' # scanner: includes scan.empty-audit
           commit-report: true
