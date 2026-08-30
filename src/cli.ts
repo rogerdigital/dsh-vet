@@ -5,9 +5,11 @@
  */
 
 import { parseArgs } from 'node:util'
+import { readFileSync } from 'node:fs'
 import { SCANNER_VERSION, scan, scanDirectory } from './scanner.ts'
 import type { VetReport } from './contract.ts'
-import { isGraded } from './contract.ts'
+import { SCHEMA_ID, isGraded } from './contract.ts'
+import { renderBadge } from './badge.ts'
 import { classifySpecifier } from './resolve.ts'
 import { existsSync } from 'node:fs'
 
@@ -17,6 +19,7 @@ export interface CliIo {
 }
 
 const USAGE = `usage: dsh-vet <specifier> [options]
+       dsh-vet badge <report.json>
 
   specifier            npm package (name[@version]), git URL, or local path
 
@@ -25,7 +28,11 @@ const USAGE = `usage: dsh-vet <specifier> [options]
   --fail-on <sev>      override the --strict threshold (critical|high|medium|low)
   --rules <ids>        comma-separated rule ids to run
   --version            print version
-  --help               this text`
+  --help               this text
+
+  badge                render a shields.io endpoint badge (JSON) from a
+                       dsh-vet/v1 report file; used by CI to publish a grade
+                       badge whose value is the committed report`
 
 const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low', 'info'] as const
 
@@ -65,6 +72,9 @@ function humanSummary(report: VetReport): string {
 
 /** Parse and run; returns the process exit code. */
 export async function runCli(argv: string[], io: CliIo): Promise<number> {
+  if (argv[0] === 'badge') {
+    return runBadge(argv.slice(1), io)
+  }
   let args: ReturnType<typeof parseArgs>
   try {
     args = parseArgs({
@@ -129,4 +139,25 @@ export async function runCli(argv: string[], io: CliIo): Promise<number> {
     io.stderr(`dsh-vet: ${(err as Error).message}`)
     return 2
   }
+}
+
+function runBadge(argv: string[], io: CliIo): number {
+  const path = argv[0]
+  if (!path || argv.length > 1 || path === '--help') {
+    io.stderr(`usage: dsh-vet badge <report.json>\n\nRender a shields.io endpoint badge from a dsh-vet/v1 report.`)
+    return 2
+  }
+  let report: VetReport
+  try {
+    report = JSON.parse(readFileSync(path, 'utf8')) as VetReport
+  } catch (err) {
+    io.stderr(`dsh-vet badge: cannot read report: ${(err as Error).message}`)
+    return 2
+  }
+  if (report.schema !== SCHEMA_ID) {
+    io.stderr(`dsh-vet badge: not a ${SCHEMA_ID} report (schema: ${String(report.schema)})`)
+    return 2
+  }
+  io.stdout(JSON.stringify(renderBadge(report)))
+  return 0
 }

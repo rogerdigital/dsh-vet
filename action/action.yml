@@ -1,0 +1,93 @@
+name: 'dsh-vet audit'
+description: >-
+  Audit a DSH plugin with dsh-vet: report artifact on every run, findings
+  comment on pull requests, and a zero-server grade badge committed from the
+  report (D3). The scanner is fetched from npm and pinned; this action runs
+  no code of its own beyond two readable scripts.
+author: 'rogerdigital'
+
+inputs:
+  specifier:
+    description: 'What to audit: local path (usually "."), npm package, or git URL'
+    default: '.'
+  version:
+    description: 'dsh-vet version to run (pinned from npm)'
+    default: '0.2.0'
+  strict:
+    description: 'Fail the job on findings >= high with confidence >= medium'
+    default: 'false'
+  fail-on:
+    description: 'Override the strict threshold (critical|high|medium|low)'
+    default: ''
+  rules:
+    description: 'Comma-separated rule ids to run (default: all)'
+    default: ''
+  comment:
+    description: 'Comment findings on pull requests (one comment, edited in place)'
+    default: 'true'
+  commit-report:
+    description: 'Commit .dsh-vet/report.json + badge.json on pushes to the default branch'
+    default: 'false'
+  github-token:
+    description: 'Token used for PR comments'
+    default: ${{ github.token }}
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Scan with dsh-vet
+      id: scan
+      continue-on-error: true
+      shell: bash
+      run: |
+        mkdir -p .dsh-vet
+        args=(--json)
+        if [ "${{ inputs.strict }}" = "true" ]; then args+=(--strict); fi
+        if [ -n "${{ inputs.fail-on }}" ]; then args+=(--fail-on "${{ inputs.fail-on }}"); fi
+        if [ -n "${{ inputs.rules }}" ]; then args+=(--rules "${{ inputs.rules }}"); fi
+        npx -y dsh-vet@${{ inputs.version }} "${args[@]}" ${{ inputs.specifier }} > .dsh-vet/report.json
+
+    - name: Badge, summary, and PR comment
+      if: always() && steps.scan.outcome != 'skipped'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: node ${{ github.action_path }}/scripts/post-results.mjs
+
+    - name: Upload report artifact
+      if: always() && steps.scan.outcome != 'skipped'
+      uses: actions/upload-artifact@v4
+      with:
+        name: dsh-vet-report
+        path: .dsh-vet/
+        if-no-files-found: ignore
+
+    - name: Fail on scan outcome
+      if: always() && steps.scan.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "dsh-vet did not pass (scanner error or threshold breach); see steps above."
+        exit 1
+
+    - name: Commit report and badge to the default branch
+      if: >-
+        always() && steps.scan.outcome == 'success' && inputs.commit-report == 'true' &&
+        github.event_name == 'push' &&
+        github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      shell: bash
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+        git add .dsh-vet
+        if git diff --staged --quiet; then
+          echo "report unchanged; nothing to commit"
+        else
+          git commit -m "chore: update dsh-vet report and badge"
+          git push
+        fi
