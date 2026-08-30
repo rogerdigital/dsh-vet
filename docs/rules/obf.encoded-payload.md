@@ -5,8 +5,11 @@ Long base64/hex string literals in shipped code.
 ## What it looks for
 
 String literals of 48+ characters with no whitespace whose entire charset is
-base64 (letters + digits + `/` `=`) or hex, and that actually mix letter
-cases with digits — pure-letter strings are usually words, not encodings.
+base64 (letters + digits + `/` `=`, actually mixing cases with digits) or hex
+— and for hex, using at least 8 distinct characters. Palette and table data
+(think `8888…`, d3 category colors) reuse a handful of digits; encoded
+payloads use the alphabet broadly. The diversity floor was calibrated on the
+v0.1 ecosystem sweep ([calibration record](../calibration-v0.1.md)).
 
 ## Severity / confidence policy
 

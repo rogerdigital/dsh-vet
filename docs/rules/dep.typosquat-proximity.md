@@ -5,9 +5,10 @@ Dependency name is one or two edits from a popular `dsh-*` package.
 ## What it looks for
 
 Each runtime dependency is compared (bounded Levenshtein distance) against a
-curated list of popular `dsh-*` package names — seeded with the ecosystem
-tools dsh-vet's README compares against (`dsh-doctor`, `dsh-plugin-audit`,
-`dsh-searxng`, `dsh-vault`, …). Exact matches to a popular name are skipped.
+curated list of popular `dsh-*` package names. Every list entry is verified
+to exist on npm — a name that cannot be installed cannot be typosquatted —
+and the list is re-checked during calibration sweeps. Exact matches to a
+popular name are skipped.
 
 ## Severity / confidence policy
 

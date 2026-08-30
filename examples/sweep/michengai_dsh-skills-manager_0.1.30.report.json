@@ -1,0 +1,68 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "@michengai/dsh-skills-manager@0.1.30",
+    "resolved": {
+      "version": "0.1.30",
+      "integrity": "sha512-4Bm2pDVmTcKBti4YfRs7C1lMdJ4S2ibxeYZJTcE+5KVBAtXCIjMYGZRHUruft4r4I8s4YIf8R7ftk+ahJH57sQ=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:34:28.449Z"
+  },
+  "summary": {
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 0,
+      "info": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/client.js",
+          "line": 91,
+          "snippet": "function callApi(path, options) { return fetch(\"/api/dsh-skills-manager\" + path, options).then(parseApiResponse); }",
+          "note": "no \"web\" seam declared (target not statically known)"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/index.js",
+          "line": 41,
+          "snippet": "await rm(`${file}.1`, { force: true });"
+        },
+        {
+          "file": "lib/index.js",
+          "line": 42,
+          "snippet": "await rename(file, `${file}.1`);"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    }
+  ]
+}

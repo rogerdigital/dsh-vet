@@ -1,8 +1,8 @@
 # Roadmap & Development Plan
 
 Trackable plan; check boxes as work lands. Status of the whole document:
-**v0.1 code complete (scanner, rules, CLI, fixtures, self-audit); remaining:
-real-plugin calibration sweep and the 0.1.0 npm release.**
+**v0.1 complete except the npm release itself (calibration swept
+[docs/calibration-v0.1.md](docs/calibration-v0.1.md); publish 0.1.0 to close).**
 
 ## Positioning
 
@@ -92,9 +92,11 @@ Decision:
 
 - [x] run the scanner on dsh-vet itself and publish the report under
   `examples/` (generated from the packed tarball; `pnpm self:audit`)
-- [ ] same for dsh-searxng
-- [ ] sweep ~10 real ecosystem plugins; record results; tune until zero obvious false positives
-- [ ] README Install section; publish `0.1.0` to npm
+- [x] same for dsh-searxng (`examples/dsh-searxng.report.json`)
+- [x] sweep ~10 real ecosystem plugins; record results; tune until zero obvious false positives
+  (11 packages, `examples/sweep/` + `docs/calibration-v0.1.md`; two tunings applied)
+- [x] README Install section
+- [ ] publish `0.1.0` to npm
 
 **Definition of done:** every box above checked; deterministic audits of
 arbitrary npm DSH plugins; results defensible on 10 real plugins; rule docs

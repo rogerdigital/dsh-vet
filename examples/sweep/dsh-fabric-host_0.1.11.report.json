@@ -1,0 +1,27 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "dsh-fabric-host@0.1.11",
+    "resolved": {
+      "version": "0.1.11",
+      "integrity": "sha512-6K0hhnkNzanEGE6M5yEN4u3gDjdU642BJT/1A0mEUMYPGtc/Z3SrglvHiH/gHqrvQmM7O0QMao+XeEVc5jM0bw=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-30T07:45:45.852Z"
+  },
+  "summary": {
+    "grade": "A",
+    "counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "info": 0
+    }
+  },
+  "findings": []
+}
