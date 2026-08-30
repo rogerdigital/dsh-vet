@@ -4,9 +4,22 @@ Security vetting for DeepSeek Harness (DSH) plugins: permission & supply-chain
 audits before install, graded via the open [`dsh-vet/v1`](docs/dsh-vet-v1.md)
 report standard.
 
-> **Status: early development.** The report contract is published as a draft
-> and the reference scanner + CLI are implemented; publication as `0.1.0` on
-> npm is pending the roadmap's calibration sweep.
+> **Status: v0.1 complete.** Contract draft, reference scanner + CLI, rule
+> set with public rationales, and an 11-package calibration sweep are in;
+> the `0.1.0` npm release is the remaining step.
+
+## Install
+
+Requires Node ≥ 20.
+
+```sh
+npm install -g dsh-vet        # or: pnpm add -g dsh-vet / bun add -g dsh-vet
+dsh-vet --help
+```
+
+Prefer not installing? `npx dsh-vet <specifier>` runs the same scanner with
+zero footprint. The scanner is the only thing that runs — dsh-vet never
+installs the plugin it audits.
 
 ## Usage
 

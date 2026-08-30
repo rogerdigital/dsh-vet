@@ -2,15 +2,15 @@
   "schema": "dsh-vet/v1",
   "target": {
     "kind": "npm-package",
-    "specifier": "dsh-vet@0.0.0",
+    "specifier": "dsh-vet@0.1.0",
     "resolved": {
-      "version": "0.0.0",
-      "integrity": "sha512-LdMw6ubsxMWjMkxZU3sLpa9wmWffo9Oqv7U8nbg6PE6T+GDoqLIe54Fzk/+uyUz5XCNWT4+6oxgKqe752J5GRQ=="
+      "version": "0.1.0",
+      "integrity": "sha512-u4v2WR+sw0zeoZxpL2fTxKbeH2twGnDB5gJWNFgkiMydCaWHXCba23ynZ2enby7m34pZVo2agu2cC2upiED4zQ=="
     }
   },
   "scanner": {
     "name": "dsh-vet",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "ranAt": "2026-08-30T00:00:00.000Z"
   },
   "summary": {
@@ -32,27 +32,27 @@
       "evidence": [
         {
           "file": "lib/index.mjs",
-          "line": 983,
+          "line": 985,
           "snippet": "const dir = specifier.startsWith(\"~/\") ? resolve(homedir(), specifier.slice(2)) : resolve(specifier);",
-          "note": "reads the user home directory; fetch in lib/index.mjs:867 is statically reachable from here"
+          "note": "reads the user home directory; fetch in lib/index.mjs:869 is statically reachable from here"
         },
         {
           "file": "lib/index.mjs",
-          "line": 1426,
+          "line": 1433,
           "snippet": "`${homedir()}/.dsh`,",
-          "note": "reads the user home directory; fetch in lib/index.mjs:867 is statically reachable from here"
+          "note": "reads the user home directory; fetch in lib/index.mjs:869 is statically reachable from here"
         },
         {
           "file": "lib/index.mjs",
-          "line": 983,
+          "line": 985,
           "snippet": "const dir = specifier.startsWith(\"~/\") ? resolve(homedir(), specifier.slice(2)) : resolve(specifier);",
-          "note": "reads the user home directory; fetch in lib/index.mjs:872 is statically reachable from here"
+          "note": "reads the user home directory; fetch in lib/index.mjs:874 is statically reachable from here"
         },
         {
           "file": "lib/index.mjs",
-          "line": 1426,
+          "line": 1433,
           "snippet": "`${homedir()}/.dsh`,",
-          "note": "reads the user home directory; fetch in lib/index.mjs:872 is statically reachable from here"
+          "note": "reads the user home directory; fetch in lib/index.mjs:874 is statically reachable from here"
         }
       ],
       "remediation": "Keep secret reads and network clients in separate modules, or document the intended data flow for each endpoint.",
@@ -68,17 +68,17 @@
       "evidence": [
         {
           "file": "lib/index.mjs",
-          "line": 815,
+          "line": 817,
           "snippet": "writeFileSync(abs, data);"
         },
         {
           "file": "lib/index.mjs",
-          "line": 817,
+          "line": 819,
           "snippet": "if (mode & 73) chmodSync(abs, mode);"
         },
         {
           "file": "lib/index.mjs",
-          "line": 893,
+          "line": 895,
           "snippet": "rmSync(dir, {"
         }
       ],
@@ -95,13 +95,13 @@
       "evidence": [
         {
           "file": "lib/index.mjs",
-          "line": 867,
+          "line": 869,
           "snippet": "const res = await (opts.fetchImpl ?? ((u) => fetch(u)))(url);",
           "note": "seam \"web\" is declared"
         },
         {
           "file": "lib/index.mjs",
-          "line": 872,
+          "line": 874,
           "snippet": "const res = await (opts.fetchImpl ?? ((u) => fetch(u)))(url);",
           "note": "seam \"web\" is declared"
         }
@@ -119,7 +119,7 @@
       "evidence": [
         {
           "file": "lib/index.mjs",
-          "line": 934,
+          "line": 936,
           "snippet": "const child = spawn(\"git\", args, { stdio: [",
           "note": "seam \"shell\" is declared"
         }
