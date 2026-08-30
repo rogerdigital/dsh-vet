@@ -1,0 +1,133 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "dsh-vet",
+    "resolved": {
+      "version": "0.2.0",
+      "integrity": "sha512-OqoSpdIHV14L+qoF04edAiFSfR9YItaX2RFbsWpig4ZtielaUH17g/gvkacdRfQXPWJ/kubUuz75oWisIXe/Kw=="
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.2.0",
+    "ranAt": "2026-08-30T09:01:52.805Z"
+  },
+  "summary": {
+    "grade": "A",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 1,
+      "low": 0,
+      "info": 2
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.secret-adjacent",
+      "title": "Network calls reachable from code that reads secrets",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/index.mjs",
+          "line": 985,
+          "snippet": "const dir = specifier.startsWith(\"~/\") ? resolve(homedir(), specifier.slice(2)) : resolve(specifier);",
+          "note": "reads the user home directory; fetch in lib/index.mjs:869 is statically reachable from here"
+        },
+        {
+          "file": "lib/index.mjs",
+          "line": 1433,
+          "snippet": "`${homedir()}/.dsh`,",
+          "note": "reads the user home directory; fetch in lib/index.mjs:869 is statically reachable from here"
+        },
+        {
+          "file": "lib/index.mjs",
+          "line": 985,
+          "snippet": "const dir = specifier.startsWith(\"~/\") ? resolve(homedir(), specifier.slice(2)) : resolve(specifier);",
+          "note": "reads the user home directory; fetch in lib/index.mjs:874 is statically reachable from here"
+        },
+        {
+          "file": "lib/index.mjs",
+          "line": 1433,
+          "snippet": "`${homedir()}/.dsh`,",
+          "note": "reads the user home directory; fetch in lib/index.mjs:874 is statically reachable from here"
+        }
+      ],
+      "remediation": "Keep secret reads and network clients in separate modules, or document the intended data flow for each endpoint.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/egress.secret-adjacent.md"
+      ]
+    },
+    {
+      "id": "perm.undeclared-fs-write",
+      "title": "Writes or deletes files outside any plausible plugin scope",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "lib/index.mjs",
+          "line": 817,
+          "snippet": "writeFileSync(abs, data);"
+        },
+        {
+          "file": "lib/index.mjs",
+          "line": 819,
+          "snippet": "if (mode & 73) chmodSync(abs, mode);"
+        },
+        {
+          "file": "lib/index.mjs",
+          "line": 895,
+          "snippet": "rmSync(dir, {"
+        }
+      ],
+      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
+      ]
+    },
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/index.mjs",
+          "line": 869,
+          "snippet": "const res = await (opts.fetchImpl ?? ((u) => fetch(u)))(url);",
+          "note": "seam \"web\" is declared"
+        },
+        {
+          "file": "lib/index.mjs",
+          "line": 874,
+          "snippet": "const res = await (opts.fetchImpl ?? ((u) => fetch(u)))(url);",
+          "note": "seam \"web\" is declared"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    },
+    {
+      "id": "perm.subprocess-spawn",
+      "title": "Spawns subprocesses",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "lib/index.mjs",
+          "line": 936,
+          "snippet": "const child = spawn(\"git\", args, { stdio: [",
+          "note": "seam \"shell\" is declared"
+        }
+      ],
+      "remediation": "Declare the shell seam in dsh.seams, or avoid spawning processes.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.subprocess-spawn.md"
+      ]
+    }
+  ]
+}
