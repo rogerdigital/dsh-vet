@@ -17,8 +17,19 @@ in-scope paths are not.
   for destructive operations outside any declared scope.
 - Non-destructive writes with a literal out-of-scope absolute path:
   **high / high.**
-- Writes whose target is a runtime value: **medium / low** (ROADMAP D2 —
-  runtime-dependent findings never lower a grade on their own).
+- Writes whose target is a runtime value: **low / low** — reported as
+  "scope not statically verifiable", never as an out-of-scope claim the
+  scanner cannot make, and never grade-affecting (ROADMAP D2). Normal
+  plugins write dynamic paths constantly; this tier is a review prompt,
+  not an accusation.
+
+The runtime-value tier deliberately does **not** attempt the path-derivation
+dataflow some disputes have asked for: constraint chains are usually
+interprocedural (derive-and-validate in one function, delete in another),
+beyond best-effort static analysis. The honest position is "unresolvable —
+review the derivation", which is what the finding now says. Clarified via
+[dispute #10](https://github.com/rogerdigital/dsh-vet/issues/10), whose
+guarded managed-directory removal is the canonical well-reviewed case.
 
 ## False positives
 

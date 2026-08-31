@@ -2,24 +2,24 @@
   "schema": "dsh-vet/v1",
   "target": {
     "kind": "npm-package",
-    "specifier": "dsh-vet@0.2.1",
+    "specifier": "dsh-vet@0.2.2",
     "resolved": {
-      "version": "0.2.1",
-      "integrity": "sha512-d3STnQInKDrBJ8ASv8fPWco5oaqDK5zh1epBSgGSdLL7TTqLfPzGJ3H1LmKLqpnfckiE6StCWWn68R4igkbfDg=="
+      "version": "0.2.2",
+      "integrity": "sha512-GHesJM07K7ogL1noy274ALh3H0D007Cu/gM0m0wBD3tgrrPr0vHYffHx2apN4yzGlZys8f4K2tRls+RtQx89Tw=="
     }
   },
   "scanner": {
     "name": "dsh-vet",
-    "version": "0.2.1",
-    "ranAt": "2026-08-30T00:00:00.000Z"
+    "version": "0.2.2",
+    "ranAt": "2026-08-31T00:00:00.000Z"
   },
   "summary": {
     "grade": "A",
     "counts": {
       "critical": 0,
       "high": 1,
-      "medium": 1,
-      "low": 0,
+      "medium": 0,
+      "low": 1,
       "info": 2
     }
   },
@@ -62,27 +62,30 @@
     },
     {
       "id": "perm.undeclared-fs-write",
-      "title": "Writes or deletes files outside any plausible plugin scope",
-      "severity": "medium",
+      "title": "Write/delete target is a runtime value — scope not statically verifiable",
+      "severity": "low",
       "confidence": "low",
       "evidence": [
         {
           "file": "lib/index.mjs",
           "line": 817,
-          "snippet": "writeFileSync(abs, data);"
+          "snippet": "writeFileSync(abs, data);",
+          "note": "review how the target is derived; the scanner cannot resolve it statically"
         },
         {
           "file": "lib/index.mjs",
           "line": 819,
-          "snippet": "if (mode & 73) chmodSync(abs, mode);"
+          "snippet": "if (mode & 73) chmodSync(abs, mode);",
+          "note": "review how the target is derived; the scanner cannot resolve it statically"
         },
         {
           "file": "lib/index.mjs",
           "line": 895,
-          "snippet": "rmSync(dir, {"
+          "snippet": "rmSync(dir, {",
+          "note": "review how the target is derived; the scanner cannot resolve it statically"
         }
       ],
-      "remediation": "Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.",
+      "remediation": "Keep the derivation next to the call, test the invariant (fixed child of a validated root), and document the managed scope so reviewers can verify it.",
       "references": [
         "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md"
       ]
