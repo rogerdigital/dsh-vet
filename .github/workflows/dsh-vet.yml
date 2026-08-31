@@ -20,9 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # Local action: self-hosting must not lag a release behind the repo.
+      # The scanner version bridges the window between the version bump on
+      # main and the npm publish — release prep bumps this line.
       - uses: ./action
         with:
           specifier: 'dsh-vet'
+          version: '0.2.2'
           commit-report: true
 
   # Exercise the working-tree action on every PR: the published tag lags the
