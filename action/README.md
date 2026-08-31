@@ -30,10 +30,13 @@ Every run uploads the full `dsh-vet/v1` report as a
 `dsh-vet-report-<job>` artifact. On pull requests, findings are posted as a
 single comment that is edited in place (never one comment per push; disable
 with `comment: false`). On pushes to the default branch (or a manual
-`workflow_dispatch`), `commit-report: true` commits `.dsh-vet/report.json`
-and `.dsh-vet/badge.json` — marked `[skip ci]`, because reports always
-differ (`scanner.ranAt`) and an ordinary commit would re-trigger workflows
-endlessly.
+`workflow_dispatch`), `commit-report: true` publishes `.dsh-vet/report.json`
+and `.dsh-vet/badge.json` **through an auto-merged PR** — protected branches
+(required status checks) reject direct pushes, so the badge stays zero-touch
+while every value change is reviewable in git history (D3). Reports that
+differ only by `scanner.ranAt` are not published, so the badge changes only
+when the audit result actually changes. Requires repo auto-merge enabled
+(Settings → General → Allow auto-merge).
 
 ## Badge
 

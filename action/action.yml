@@ -84,21 +84,34 @@ runs:
         echo "dsh-vet did not pass (scanner error or threshold breach); see steps above."
         exit 1
 
-    - name: Commit report and badge to the default branch
+    - name: Publish report and badge to the default branch
       if: >-
         always() && steps.scan.outcome == 'success' && inputs.commit-report == 'true' &&
         (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
         github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
+        # Reports always differ by scanner.ranAt; publish only when the
+        # meaningful content changed, or every push would raise a PR.
+        if [ -f .dsh-vet/report.json ] && git show 'HEAD:.dsh-vet/report.json' >/dev/null 2>&1; then
+          if diff <(jq -S 'del(.scanner.ranAt)' .dsh-vet/report.json) <(git show 'HEAD:.dsh-vet/report.json' | jq -S 'del(.scanner.ranAt)') >/dev/null; then
+            echo "report unchanged beyond ranAt; nothing to publish"
+            exit 0
+          fi
+        fi
+        # Protected branches (required status checks) reject direct pushes, so
+        # the update travels as an auto-merged PR: the badge stays zero-touch
+        # and every value change is reviewable in git history (D3).
+        branch='dsh-vet/report'
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+        git checkout -B "$branch"
         git add .dsh-vet
-        if git diff --staged --quiet; then
-          echo "report unchanged; nothing to commit"
-        else
-          # [skip ci] is load-bearing: reports always differ (scanner.ranAt),
-          # so an ordinary commit would re-trigger workflows forever.
-          git commit -m "chore: update dsh-vet report and badge [skip ci]"
-          git push
-        fi
+        git commit -m "chore: update dsh-vet report and badge"
+        git push --force-with-lease origin "$branch"
+        gh pr create --head "$branch" --title 'chore: update dsh-vet report and badge' \
+          --body "Zero-server badge refresh (D3): the report changed beyond \`scanner.ranAt\`. Run: ${RUN_URL}" \
+          --auto 2>/dev/null || gh pr merge "$branch" --auto 2>/dev/null || true

@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: rogerdigital/dsh-vet/action@v0.2.0
+      # Local action: self-hosting must not lag a release behind the repo.
+      - uses: ./action
         with:
           specifier: 'dsh-vet'
-          version: '0.2.2' # scanner: dispute-10 wording fix + scan.empty-audit
           commit-report: true
 
   # Exercise the working-tree action on every PR: the published tag lags the
