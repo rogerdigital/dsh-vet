@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.4
+
+- Action: the badge-update PR now actually gets created and auto-merged.
+  Two live-caught bugs: `gh pr merge --auto` without an explicit merge
+  method prints usage and fails, and the original chain swallowed every
+  error (`2>/dev/null ... || true`), leaving a pushed branch with no PR
+  and no signal. Creation is now idempotent and loud; auto-merge failure
+  degrades to a visible warning with the PR awaiting manual merge.
+- No scanner behavior change.
 ## 0.2.3
 
 - Action: `commit-report` now publishes through an **auto-merged PR**
