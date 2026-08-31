@@ -23,6 +23,7 @@ function api(path, init, token) {
 
 async function upsertComment(markdown) {
   const { GITHUB_REPOSITORY, GH_TOKEN, PR_NUMBER } = process.env
+  if (process.env.COMMENT_ENABLED === 'false') return // action input `comment: false`
   if (!GITHUB_REPOSITORY || !GH_TOKEN || !PR_NUMBER) return
   try {
     const comments = await (
