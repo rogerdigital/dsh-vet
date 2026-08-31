@@ -4,14 +4,14 @@
     "kind": "npm-package",
     "specifier": "dsh-vet",
     "resolved": {
-      "version": "0.2.2",
-      "integrity": "sha512-GHesJM07K7ogL1noy274ALh3H0D007Cu/gM0m0wBD3tgrrPr0vHYffHx2apN4yzGlZys8f4K2tRls+RtQx89Tw=="
+      "version": "0.2.4",
+      "integrity": "sha512-PaxH7qOhM9zcRUEuvANPdbj29mA8f8EUSqsKy3y4mRg1x185hdn1TGj6bOQfwgwO/xEZuFrbyv5j7ARjWe1sFA=="
     }
   },
   "scanner": {
     "name": "dsh-vet",
-    "version": "0.2.2",
-    "ranAt": "2026-08-31T15:16:52.707Z"
+    "version": "0.2.4",
+    "ranAt": "2026-08-31T16:27:34.256Z"
   },
   "summary": {
     "grade": "A",
