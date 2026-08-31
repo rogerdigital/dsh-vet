@@ -11,8 +11,11 @@ inputs:
     description: 'What to audit: local path (usually "."), npm package, or git URL'
     default: '.'
   version:
-    description: 'dsh-vet version to run (pinned from npm)'
-    default: '0.2.2'
+    description: >-
+      dsh-vet version to run. The default always matches the action tag this
+      file ships in (e.g. @v0.2.3 runs 0.2.3), so pinning the action ref is
+      sufficient; override only to run an older scanner deliberately.
+    default: '0.2.3'
   strict:
     description: 'Fail the job on findings >= high with confidence >= medium'
     default: 'false'

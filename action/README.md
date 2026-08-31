@@ -55,13 +55,17 @@ report.
 | Input | Default | Description |
 |---|---|---|
 | `specifier` | `.` | What to audit: local path, npm package, or git URL |
-| `version` | `0.2.2` | dsh-vet version, pinned from npm |
+| `version` | tag version | dsh-vet version — the default always matches the action tag, so **pin the action ref and omit this**; override only to pin an older scanner deliberately |
 | `strict` | `false` | Fail the job on findings ≥ high with confidence ≥ medium |
 | `fail-on` | — | Override the strict threshold (`critical\|high\|medium\|low`) |
 | `rules` | — | Comma-separated rule ids to run (default: all) |
 | `comment` | `true` | Comment findings on pull requests |
 | `commit-report` | `false` | Commit report + badge on pushes to the default branch |
 | `github-token` | `github.token` | Token used for PR comments |
+
+**Consumers only need to pin the action ref.** Add a Dependabot config
+(`package-ecosystem: github-actions`) and ref updates arrive as PRs — no
+per-release edits to your workflow.
 
 ## Notes
 
