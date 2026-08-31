@@ -1,6 +1,6 @@
 {
   "name": "dsh-vet",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Security vetting for DeepSeek Harness (DSH) plugins: permission & supply-chain audits before install, graded via the open dsh-vet/v1 report standard.",
   "dsh": {
     "seams": ["fs", "shell", "web"]

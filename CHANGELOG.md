@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.5
+
+- Action: the badge-update branch pushes with `--force` instead of
+  `--force-with-lease`. The lease rejected pushes as "stale info"
+  whenever `dsh-vet/report` survived remotely (an unmerged PR or a
+  racing run) while the runner's shallow checkout had never fetched it —
+  a disposable bot branch rebuilt from main on every run needs no lease.
+- No scanner behavior change.
 ## 0.2.4
 
 - Action: the badge-update PR now actually gets created and auto-merged.

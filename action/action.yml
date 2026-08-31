@@ -15,7 +15,7 @@ inputs:
       dsh-vet version to run. The default always matches the action tag this
       file ships in (e.g. @v0.2.3 runs 0.2.3), so pinning the action ref is
       sufficient; override only to run an older scanner deliberately.
-    default: '0.2.4'
+    default: '0.2.5'
   strict:
     description: 'Fail the job on findings >= high with confidence >= medium'
     default: 'false'
@@ -114,7 +114,11 @@ runs:
         git checkout -B "$branch"
         git add .dsh-vet
         git commit -m "chore: update dsh-vet report and badge"
-        git push --force-with-lease origin "$branch"
+        # Plain --force: dsh-vet/report is a disposable bot branch rebuilt
+        # from main on every run. --force-with-lease rejects as "stale info"
+        # whenever the branch survived remotely (an unmerged PR or a racing
+        # run) while the runner's shallow checkout had never fetched it.
+        git push --force origin "$branch"
         # Idempotent: reuse the PR when the branch already has one. Auto-merge
         # needs an explicit merge method, or gh prints usage and exits nonzero.
         gh pr view "$branch" --json number >/dev/null 2>&1 || \
