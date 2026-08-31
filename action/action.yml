@@ -119,10 +119,13 @@ runs:
         # whenever the branch survived remotely (an unmerged PR or a racing
         # run) while the runner's shallow checkout had never fetched it.
         git push --force origin "$branch"
-        # Idempotent: reuse the PR when the branch already has one. Auto-merge
-        # needs an explicit merge method, or gh prints usage and exits nonzero.
-        gh pr view "$branch" --json number >/dev/null 2>&1 || \
+        # Idempotent: reuse an OPEN PR when one exists. `gh pr view <branch>`
+        # also matches MERGED pulls and exits 0, silently skipping creation —
+        # filter on state explicitly. Auto-merge needs an explicit merge
+        # method, or gh prints usage and exits nonzero.
+        if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')" ]; then
           gh pr create --head "$branch" --title 'chore: update dsh-vet report and badge' \
             --body "Zero-server badge refresh (D3): the report changed beyond \`scanner.ranAt\`. Run: ${RUN_URL}"
+        fi
         gh pr merge "$branch" --auto --merge \
           || echo "dsh-vet: auto-merge unavailable; the badge PR awaits manual merge"
