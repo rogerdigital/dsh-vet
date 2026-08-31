@@ -77,4 +77,24 @@ describe('scanner', () => {
       rmSync(empty, { recursive: true, force: true })
     }
   })
+
+  it('reports runtime-value write targets as unverifiable, not out-of-scope (dispute #10)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'dsh-vet-dynwrite-'))
+    try {
+      writeFileSync(join(dir, 'package.json'), '{"name":"managed-cleaner","main":"index.js"}')
+      writeFileSync(
+        join(dir, 'index.js'),
+        "const { rm } = require('node:fs')\nconst target = derive()\nawait rm(target, { recursive: true })\nfunction derive() { return process.env.DSH_HOME }\n",
+      )
+      const report = await scanDirectory(dir, { now: () => '2026-01-01T00:00:00.000Z' })
+      const finding = report.findings.find((f) => f.id === 'perm.undeclared-fs-write')
+      expect(finding?.severity).toBe('low')
+      expect(finding?.confidence).toBe('low')
+      expect(finding?.title).toContain('not statically verifiable')
+      // Low confidence never grades: an unresolvable target must not read as an accusation.
+      expect(report.summary.grade).toBe('A')
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
 })

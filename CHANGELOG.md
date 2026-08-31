@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.2
+
+- `perm.undeclared-fs-write`: the runtime-value tier no longer asserts the
+  target is "outside any plausible plugin scope" — a claim a static scanner
+  cannot make about a dynamic path. It now reports "scope not statically
+  verifiable" at low/low (review prompt, never grade-affecting). Literal
+  out-of-scope writes keep high/critical. Clarified via false-positive
+  dispute [#10](https://github.com/rogerdigital/dsh-vet/issues/10), whose
+  guarded managed-directory removal was verified against source and tests
+  before the rule changed.
+
 ## 0.2.1
 
 - New rule `scan.empty-audit` (medium/high): a scan that found zero

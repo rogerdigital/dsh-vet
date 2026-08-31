@@ -102,13 +102,20 @@ export const undeclaredFsWrite: Rule = {
     if (dynamic.length > 0) {
       findings.push(
         finding(this, {
-          severity: 'medium',
+          title: 'Write/delete target is a runtime value — scope not statically verifiable',
+          severity: 'low',
           confidence: 'low',
           evidence: capEvidence(
-            dynamic.map((use) => ({ file: use.file, line: use.line, snippet: use.snippet })),
+            dynamic.map((use) => ({
+              file: use.file,
+              line: use.line,
+              snippet: use.snippet,
+              note: 'review how the target is derived; the scanner cannot resolve it statically',
+            })),
             5,
           ),
-          remediation: 'Use fixed, reviewable paths; runtime-computed write targets cannot be audited statically.',
+          remediation:
+            'Keep the derivation next to the call, test the invariant (fixed child of a validated root), and document the managed scope so reviewers can verify it.',
           references: ['https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.undeclared-fs-write.md'],
         }),
       )
