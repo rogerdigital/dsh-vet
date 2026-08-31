@@ -15,7 +15,7 @@ inputs:
       dsh-vet version to run. The default always matches the action tag this
       file ships in (e.g. @v0.2.3 runs 0.2.3), so pinning the action ref is
       sufficient; override only to run an older scanner deliberately.
-    default: '0.2.3'
+    default: '0.2.4'
   strict:
     description: 'Fail the job on findings >= high with confidence >= medium'
     default: 'false'
@@ -115,6 +115,10 @@ runs:
         git add .dsh-vet
         git commit -m "chore: update dsh-vet report and badge"
         git push --force-with-lease origin "$branch"
-        gh pr create --head "$branch" --title 'chore: update dsh-vet report and badge' \
-          --body "Zero-server badge refresh (D3): the report changed beyond \`scanner.ranAt\`. Run: ${RUN_URL}" \
-          --auto 2>/dev/null || gh pr merge "$branch" --auto 2>/dev/null || true
+        # Idempotent: reuse the PR when the branch already has one. Auto-merge
+        # needs an explicit merge method, or gh prints usage and exits nonzero.
+        gh pr view "$branch" --json number >/dev/null 2>&1 || \
+          gh pr create --head "$branch" --title 'chore: update dsh-vet report and badge' \
+            --body "Zero-server badge refresh (D3): the report changed beyond \`scanner.ranAt\`. Run: ${RUN_URL}"
+        gh pr merge "$branch" --auto --merge \
+          || echo "dsh-vet: auto-merge unavailable; the badge PR awaits manual merge"
