@@ -18,7 +18,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Local action: self-hosting must not lag a release behind the repo.
       # The scanner version bridges the window between the version bump on
       # main and the npm publish — release prep bumps this line.
@@ -33,7 +33,7 @@ jobs:
   action-smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./action
         with:
           specifier: 'fixtures/offender-kitchen-sink'
