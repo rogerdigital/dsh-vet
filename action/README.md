@@ -30,10 +30,13 @@ Every run uploads the full `dsh-vet/v1` report as a
 `dsh-vet-report-<job>` artifact. On pull requests, findings are posted as a
 single comment that is edited in place (never one comment per push; disable
 with `comment: false`). On pushes to the default branch (or a manual
-`workflow_dispatch`), `commit-report: true` commits `.dsh-vet/report.json`
-and `.dsh-vet/badge.json` — marked `[skip ci]`, because reports always
-differ (`scanner.ranAt`) and an ordinary commit would re-trigger workflows
-endlessly.
+`workflow_dispatch`), `commit-report: true` publishes `.dsh-vet/report.json`
+and `.dsh-vet/badge.json` **through an auto-merged PR** — protected branches
+(required status checks) reject direct pushes, so the badge stays zero-touch
+while every value change is reviewable in git history (D3). Reports that
+differ only by `scanner.ranAt` are not published, so the badge changes only
+when the audit result actually changes. Requires repo auto-merge enabled
+(Settings → General → Allow auto-merge).
 
 ## Badge
 
@@ -52,13 +55,17 @@ report.
 | Input | Default | Description |
 |---|---|---|
 | `specifier` | `.` | What to audit: local path, npm package, or git URL |
-| `version` | `0.2.2` | dsh-vet version, pinned from npm |
+| `version` | tag version | dsh-vet version — the default always matches the action tag, so **pin the action ref and omit this**; override only to pin an older scanner deliberately |
 | `strict` | `false` | Fail the job on findings ≥ high with confidence ≥ medium |
 | `fail-on` | — | Override the strict threshold (`critical\|high\|medium\|low`) |
 | `rules` | — | Comma-separated rule ids to run (default: all) |
 | `comment` | `true` | Comment findings on pull requests |
 | `commit-report` | `false` | Commit report + badge on pushes to the default branch |
 | `github-token` | `github.token` | Token used for PR comments |
+
+**Consumers only need to pin the action ref.** Add a Dependabot config
+(`package-ecosystem: github-actions`) and ref updates arrive as PRs — no
+per-release edits to your workflow.
 
 ## Notes
 

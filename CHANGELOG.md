@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.3
+
+- Action: `commit-report` now publishes through an **auto-merged PR**
+  instead of a direct push to the default branch — protected branches
+  (required status checks) reject direct pushes, which broke the badge
+  refresh the moment branch protection was enabled (GH013). Reports that
+  differ only by `scanner.ranAt` are not published, so a badge changes
+  only when the audit result changes — no PR per push. The [skip ci]
+  marker is gone: it would have skipped the PR's required checks.
+- This repo's audit job self-hosts the working-tree action (`uses:
+  ./action`) so self-auditing never lags a release behind the repo.
+- No scanner behavior change; the contract is unchanged.
 ## 0.2.2
 
 - `perm.undeclared-fs-write`: the runtime-value tier no longer asserts the
