@@ -24,3 +24,15 @@ jobs:
           specifier: 'dsh-vet'
           version: '0.2.2' # scanner: dispute-10 wording fix + scan.empty-audit
           commit-report: true
+
+  # Exercise the working-tree action on every PR: the published tag lags the
+  # repo, so without this nothing tests action/ changes until the next tag.
+  action-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./action
+        with:
+          specifier: 'fixtures/offender-kitchen-sink'
+          version: '0.2.2'
+          comment: 'false'

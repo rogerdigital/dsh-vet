@@ -12,7 +12,7 @@ inputs:
     default: '.'
   version:
     description: 'dsh-vet version to run (pinned from npm)'
-    default: '0.2.0'
+    default: '0.2.2'
   strict:
     description: 'Fail the job on findings >= high with confidence >= medium'
     default: 'false'
@@ -63,13 +63,17 @@ runs:
         GH_TOKEN: ${{ inputs.github-token }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        COMMENT_ENABLED: ${{ inputs.comment }}
       run: node ${{ github.action_path }}/scripts/post-results.mjs
 
     - name: Upload report artifact
       if: always() && steps.scan.outcome != 'skipped'
       uses: actions/upload-artifact@v4
       with:
-        name: dsh-vet-report
+        # Suffix with the job id: nothing stops a workflow from running this
+        # action twice (e.g. an audit job plus a local-action smoke job), and
+        # artifact names are unique per run.
+        name: dsh-vet-report-${{ github.job }}
         path: .dsh-vet/
         if-no-files-found: ignore
 

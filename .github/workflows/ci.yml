@@ -31,3 +31,30 @@ jobs:
         run: pnpm typecheck && pnpm test
       - if: matrix.node-version == 24
         run: pnpm verify
+
+  actionlint:
+    # The workflows and the composite action are hand-written YAML; expression
+    # and schema errors there only surface on the next real run otherwise.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install actionlint (pinned, script fetched from the same tag)
+        run: bash <(curl -sL "https://raw.githubusercontent.com/rhysd/actionlint/v1.7.7/scripts/download-actionlint.bash" 1.7.7)
+      - run: actionlint -color
+
+  supply-chain:
+    # A trust tool is its own first audit target: production dependency tree
+    # must be free of known high/critical advisories.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.23.0
+          run_install: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --prod --audit-level=high

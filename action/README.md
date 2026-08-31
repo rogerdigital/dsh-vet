@@ -26,13 +26,14 @@ jobs:
           commit-report: true      # keep .dsh-vet/report.json + badge.json on main
 ```
 
-Every run uploads the full `dsh-vet/v1` report as the `dsh-vet-report`
-artifact. On pull requests, findings are posted as a single comment that is
-edited in place (never one comment per push). On pushes to the default
-branch (or a manual `workflow_dispatch`), `commit-report: true` commits
-`.dsh-vet/report.json` and `.dsh-vet/badge.json` — marked `[skip ci]`,
-because reports always differ (`scanner.ranAt`) and an ordinary commit
-would re-trigger workflows endlessly.
+Every run uploads the full `dsh-vet/v1` report as a
+`dsh-vet-report-<job>` artifact. On pull requests, findings are posted as a
+single comment that is edited in place (never one comment per push; disable
+with `comment: false`). On pushes to the default branch (or a manual
+`workflow_dispatch`), `commit-report: true` commits `.dsh-vet/report.json`
+and `.dsh-vet/badge.json` — marked `[skip ci]`, because reports always
+differ (`scanner.ranAt`) and an ordinary commit would re-trigger workflows
+endlessly.
 
 ## Badge
 
@@ -51,7 +52,7 @@ report.
 | Input | Default | Description |
 |---|---|---|
 | `specifier` | `.` | What to audit: local path, npm package, or git URL |
-| `version` | `0.2.0` | dsh-vet version, pinned from npm |
+| `version` | `0.2.2` | dsh-vet version, pinned from npm |
 | `strict` | `false` | Fail the job on findings ≥ high with confidence ≥ medium |
 | `fail-on` | — | Override the strict threshold (`critical\|high\|medium\|low`) |
 | `rules` | — | Comma-separated rule ids to run (default: all) |

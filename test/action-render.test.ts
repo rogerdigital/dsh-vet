@@ -1,11 +1,13 @@
-import { execFileSync } from 'node:child_process'
-import { readFileSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { readFileSync, mkdtempSync, mkdirSync, rmSync, writeFileSync, copyFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderBadgeJson, renderCommentMarkdown } from '../action/scripts/render.mjs'
 import type { VetReport } from '../src/contract.ts'
+
+const FIXTURES_DIR = fileURLToPath(new URL('../fixtures', import.meta.url))
 
 const kitchenSink = JSON.parse(
   readFileSync(new URL('../fixtures/offender-kitchen-sink/expected.report.json', import.meta.url), 'utf8'),
@@ -70,6 +72,36 @@ describe('post-results script', () => {
       // The scan redirect creates the file before the scanner runs; an empty
       // report must take the did-not-complete path, never crash the step.
       execFileSync('node', [script], { cwd: work, stdio: 'pipe' })
+    } finally {
+      rmSync(work, { recursive: true, force: true })
+    }
+  })
+
+  it('honors comment: false — no comment attempt, badge still written', () => {
+    const script = join(dirname(fileURLToPath(import.meta.url)), '..', 'action', 'scripts', 'post-results.mjs')
+    const work = mkdtempSync(join(tmpdir(), 'dsh-vet-post-'))
+    try {
+      mkdirSync(join(work, '.dsh-vet'), { recursive: true })
+      copyFileSync(
+        join(FIXTURES_DIR, 'offender-kitchen-sink', 'expected.report.json'),
+        join(work, '.dsh-vet', 'report.json'),
+      )
+      // PR env present but commenting disabled: must short-circuit before any
+      // network call (a broken gate would warn "PR comment failed").
+      const result = spawnSync('node', [script], {
+        cwd: work,
+        env: {
+          ...process.env,
+          COMMENT_ENABLED: 'false',
+          GITHUB_REPOSITORY: 'example/example',
+          GH_TOKEN: 'definitely-not-a-token',
+          PR_NUMBER: '7',
+        },
+      })
+      expect(result.status).toBe(0)
+      expect(result.stderr.toString()).not.toContain('PR comment failed')
+      const badge = JSON.parse(readFileSync(join(work, '.dsh-vet', 'badge.json'), 'utf8'))
+      expect(badge).toMatchObject({ message: 'grade D', color: 'orange' })
     } finally {
       rmSync(work, { recursive: true, force: true })
     }
