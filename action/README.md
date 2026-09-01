@@ -31,24 +31,23 @@ Every run uploads the full `dsh-vet/v1` report as a
 single comment that is edited in place (never one comment per push; disable
 with `comment: false`). On pushes to the default branch (or a manual
 `workflow_dispatch`), `commit-report: true` publishes `.dsh-vet/report.json`
-and `.dsh-vet/badge.json` **through an auto-merged PR** — protected branches
-(required status checks) reject direct pushes, so the badge stays zero-touch
-while every value change is reviewable in git history (D3). Reports that
-differ only by `scanner.ranAt` are not published, so the badge changes only
-when the audit result actually changes. Requires repo auto-merge enabled
-(Settings → General → Allow auto-merge).
+and `.dsh-vet/badge.json` to the **`dsh-vet/report` branch** — an
+unprotected bot branch whose history is the badge's audit trail (D3). The
+default branch stays untouched: no PR to merge, no checks to pass, no
+repository settings to enable. Reports that differ only by `scanner.ranAt`
+are not republished, so the badge changes only when the audit result does.
 
 ## Badge
 
-Add to your README after the first `commit-report` run lands:
+Add to your README (shields.io fetches `badge.json` straight from your
+`dsh-vet/report` branch):
 
 ```markdown
-[![dsh-vet](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/OWNER/REPO/main/.dsh-vet/badge.json)](https://github.com/OWNER/REPO/blob/main/.dsh-vet/report.json)
+[![dsh-vet](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOWNER%2FREPO%2Fdsh-vet%2Freport%2F.dsh-vet%2Fbadge.json)](https://github.com/OWNER/REPO/blob/dsh-vet/report/.dsh-vet/report.json)
 ```
 
-shields.io fetches `badge.json` straight from your repository; dsh-vet runs
-no badge infrastructure and the badge value cannot drift from the committed
-report.
+dsh-vet runs no badge infrastructure and the badge value cannot drift from
+the committed report.
 
 ## Inputs
 

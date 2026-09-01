@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.6
+
+- **Breaking (action): the badge now lives on the `dsh-vet/report` branch.**
+  The PR-based publish path was architecturally incompatible with
+  GITHUB_TOKEN: workflows on Actions-created PRs require per-PR human
+  approval (`action_required`), so required checks can never pass and
+  auto-merge can never fire — found live after enabling PR creation.
+  The branch-based design needs no PR, no checks, and no repository
+  settings: the audit force-publishes report + badge to the unprotected
+  `dsh-vet/report` branch, shields.io reads it, and the branch history
+  remains the D3 audit trail. Badge URLs change from `main` to
+  `dsh-vet/report`. The default branch no longer carries `.dsh-vet/`.
+- Dedup compares against the branch tip (reports differing only by
+  `scanner.ranAt` are not republished).
+- No scanner behavior change.
 ## 0.2.5
 
 - Action: the badge-update branch pushes with `--force` instead of
