@@ -2,15 +2,15 @@
   "schema": "dsh-vet/v1",
   "target": {
     "kind": "npm-package",
-    "specifier": "dsh-vet@0.2.5",
+    "specifier": "dsh-vet@0.2.6",
     "resolved": {
-      "version": "0.2.5",
-      "integrity": "sha512-VxOlddXL6w8jRk4LuSU3ps4CfIlzhQ5L6mOn9gBUABx6ft/tCmwxgMJqDzUKl5r90TtsLNGBhD3P+XAaG9nfzg=="
+      "version": "0.2.6",
+      "integrity": "sha512-idKaQZztBNn0WTgPsEAAyrOtosMNCGpH32uGXWpAbn37RWwmGhPUp69iJWKRkby2KCq4kzso4PKVPXsi01WPyA=="
     }
   },
   "scanner": {
     "name": "dsh-vet",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "ranAt": "2026-09-01T00:00:00.000Z"
   },
   "summary": {

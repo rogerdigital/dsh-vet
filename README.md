@@ -1,6 +1,6 @@
 # dsh-vet
 
-[![dsh-vet](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/rogerdigital/dsh-vet/main/.dsh-vet/badge.json)](https://github.com/rogerdigital/dsh-vet/blob/main/.dsh-vet/report.json)
+[![dsh-vet](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frogerdigital%2Fdsh-vet%2Fdsh-vet%2Freport%2F.dsh-vet%2Fbadge.json)](https://github.com/rogerdigital/dsh-vet/blob/dsh-vet/report/.dsh-vet/report.json)
 
 Security vetting for DeepSeek Harness (DSH) plugins: permission & supply-chain
 audits before install, graded via the open [`dsh-vet/v1`](docs/dsh-vet-v1.md)
