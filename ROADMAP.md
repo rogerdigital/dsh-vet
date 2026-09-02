@@ -2,8 +2,9 @@
 
 Trackable plan; check boxes as work lands. Status of the whole document:
 **v0.2 shipped (`0.2.1` on npm, tag `v0.2.1`); v0.3 underway — the 0.3.0
-groundwork (validator, emitter program, pitch materials) is in, the
-external moves follow.**
+groundwork is shipped and the first outreach round is live; marketplace
+adoption, third-party emitter verification, feedback, and contract freeze
+remain.**
 
 ## Positioning
 
@@ -136,19 +137,24 @@ Status: the in-repo groundwork shipped with 0.3.0 — `dsh-vet validate`
 verification), the exported reference markdown renderer, the
 verified-emitter checklist and registry (`docs/emitters.md`), the
 marketplace pitch (`docs/adopt-marketplace.md`), and the announcement
-drafts (`docs/outreach/`). What remains is external: sending the pitches,
-collecting feedback, and only then announcing the freeze.
+drafts (`docs/outreach/`). The first outreach round went live on 2026-09-02:
+the [#1115 contract follow-up](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18247257),
+[Show Your Plugins post](https://github.com/deepseek-ai/deepseek-harness/discussions/5423),
+[awesome-list PR](https://github.com/0xsline/awesome-deepseek-harness/pull/556),
+and [dsh-plugin-audit collaboration issue](https://github.com/jkrandom-sudo/dsh-plugin-audit/issues/8).
+What remains is collecting feedback, securing marketplace and emitter
+adoption, and only then announcing the freeze.
 
 - [ ] pitch report rendering to 1–2 marketplaces (dshmarket, dsh-hub.cc)
 - [ ] incorporate feedback; freeze `dsh-vet/v1`
 - [ ] publish a verified third-party emitter checklist and list emitters
   (checklist + registry live in `docs/emitters.md`; listing needs ≥1
   verified third-party emitter)
-- [ ] announcements: reply under
-  [deepseek-harness#1115](https://github.com/deepseek-ai/deepseek-harness/discussions/1115),
-  a Show Your Plugins post, awesome-list PRs (drafts in `docs/outreach/`)
-- [ ] explore a complementary narrative with `dsh-plugin-audit`
-  (static report + runtime sentinel) — draft proposal in `docs/outreach/`
+- [x] announcements: [reply under deepseek-harness#1115](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18247257),
+  [Show Your Plugins post](https://github.com/deepseek-ai/deepseek-harness/discussions/5423),
+  and [awesome-list PR](https://github.com/0xsline/awesome-deepseek-harness/pull/556)
+- [x] explore a complementary narrative with `dsh-plugin-audit`
+  (static report + runtime sentinel) — [collaboration issue](https://github.com/jkrandom-sudo/dsh-plugin-audit/issues/8)
 
 **Definition of done:** ≥1 marketplace renders `dsh-vet/v1`; ≥1 third-party
 emitter verified; contract frozen.
