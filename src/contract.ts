@@ -98,7 +98,8 @@ export interface VetReport {
   readonly findings: readonly VetFinding[]
 }
 
-const SEVERITY_RANK: Record<VetSeverity, number> = {
+/** Sort rank per severity, worst first; the contract's deterministic order. */
+export const SEVERITY_RANK: Record<VetSeverity, number> = {
   critical: 0,
   high: 1,
   medium: 2,
