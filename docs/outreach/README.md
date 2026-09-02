@@ -10,3 +10,4 @@ record the thread link in ROADMAP.md v0.3 so feedback has a traceable home.
 | [show-your-plugins-post.md](show-your-plugins-post.md) | community "Show Your Plugins" thread | 0.3.0 published |
 | [awesome-list-pr.md](awesome-list-pr.md) | PR against a dsh/agent awesome-list | — |
 | [dsh-plugin-audit-collab.md](dsh-plugin-audit-collab.md) | issue/DM to dsh-plugin-audit maintainers | — |
+| [dsh-searxng-adopters-post.md](dsh-searxng-adopters-post.md) | plugin thread, from the dsh-searxng maintainer account — the adopter voice | — |
