@@ -10,6 +10,7 @@ import { SCANNER_VERSION, scan, scanDirectory } from './scanner.ts'
 import type { VetReport } from './contract.ts'
 import { SCHEMA_ID, isGraded } from './contract.ts'
 import { renderBadge } from './badge.ts'
+import { validateReport } from './validate.ts'
 import { classifySpecifier } from './resolve.ts'
 import { existsSync } from 'node:fs'
 
@@ -20,6 +21,7 @@ export interface CliIo {
 
 const USAGE = `usage: dsh-vet <specifier> [options]
        dsh-vet badge <report.json>
+       dsh-vet validate <report.json> [<report.json> ...]
 
   specifier            npm package (name[@version]), git URL, or local path
 
@@ -32,7 +34,11 @@ const USAGE = `usage: dsh-vet <specifier> [options]
 
   badge                render a shields.io endpoint badge (JSON) from a
                        dsh-vet/v1 report file; used by CI to publish a grade
-                       badge whose value is the committed report`
+                       badge whose value is the committed report
+
+  validate             check report file(s) against the dsh-vet/v1 contract;
+                       the entry point for marketplaces and CI jobs consuming
+                       reports from scanners they did not write`
 
 const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low', 'info'] as const
 
@@ -74,6 +80,9 @@ function humanSummary(report: VetReport): string {
 export async function runCli(argv: string[], io: CliIo): Promise<number> {
   if (argv[0] === 'badge') {
     return runBadge(argv.slice(1), io)
+  }
+  if (argv[0] === 'validate') {
+    return runValidate(argv.slice(1), io)
   }
   let args: ReturnType<typeof parseArgs>
   try {
@@ -160,4 +169,38 @@ function runBadge(argv: string[], io: CliIo): number {
   }
   io.stdout(JSON.stringify(renderBadge(report)))
   return 0
+}
+
+/**
+ * `dsh-vet validate <report.json> [...]` — check reports against the
+ * contract. Exit 0 when every file is valid, 1 when any is invalid (the
+ * issues are data, printed for repair), 2 on usage or unreadable files.
+ */
+function runValidate(argv: string[], io: CliIo): number {
+  const paths = argv.filter((arg) => arg !== '--help')
+  if (paths.length === 0 || argv.includes('--help')) {
+    io.stderr(`usage: dsh-vet validate <report.json> [<report.json> ...]\n\nCheck report file(s) against the dsh-vet/v1 contract.`)
+    return 2
+  }
+  let worst = 0
+  for (const path of paths) {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(readFileSync(path, 'utf8'))
+    } catch (err) {
+      io.stderr(`dsh-vet validate: cannot read report: ${(err as Error).message}`)
+      return 2
+    }
+    const { ok, issues } = validateReport(parsed)
+    if (ok) {
+      io.stdout(`ok      ${path}`)
+      continue
+    }
+    worst = 1
+    io.stdout(`invalid ${path}`)
+    for (const issue of issues) {
+      io.stdout(`  ${issue.path}: ${issue.message}`)
+    }
+  }
+  return worst
 }

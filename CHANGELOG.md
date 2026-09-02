@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.3.0
+
+- **New: `dsh-vet validate <report.json>` — the contract conformance gate
+  for consumers and emitters.** A marketplace or CI job receiving reports
+  from scanners it did not write can now check them against the contract
+  instead of trusting the emitter: field types, enums, rule-id shape,
+  evidence presence, RFC 3339 timestamps, and — the load-bearing check —
+  the derived summary, where the grade and counts are recomputed from the
+  findings, so a report cannot assert a grade its evidence does not
+  support. Unknown fields are ignored (design rule 4). The corpus test
+  proves every report ever committed here still validates, including those
+  emitted by scanner 0.1.0. Also exported as `validateReport()` from the
+  package.
+- **New: `renderMarkdown()` exported from the package** — the reference
+  findings/grade rendering (the same markdown the GitHub Action posts on
+  PRs), so marketplaces and integrations render reports without
+  reimplementing it. `action/scripts/render.mjs` keeps its dependency-free
+  copy (the composite action must not depend on the installed scanner
+  version); a cross-check test asserts the two stay identical.
+- **v0.3 ecosystem groundwork:** verified-emitter checklist and registry
+  (`docs/emitters.md`), marketplace adoption one-pager
+  (`docs/adopt-marketplace.md`), and ready-to-send announcement drafts
+  (`docs/outreach/`).
+- **Contract status reconciled.** The spec header still said *draft* while
+  the README said *frozen* and the roadmap scheduled the freeze for v0.3 —
+  three stories in circulation. All three now say the same thing: stable,
+  additive-only since 0.1.0, formal freeze after the v0.3 feedback round.
+- No scanner behavior change.
+
 ## 0.2.6
 
 - **Breaking (action): the badge now lives on the `dsh-vet/report` branch.**

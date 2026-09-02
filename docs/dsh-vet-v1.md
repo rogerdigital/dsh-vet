@@ -1,7 +1,11 @@
 # The `dsh-vet/v1` report contract
 
-Status: **draft** — open for community input before v0.1 freezes it.
+Status: **stable — additive-only since v0.1.0.** Every report the 0.1.0
+reference scanner emitted still validates today. The formal freeze is
+announced with v0.3, after the marketplace-feedback round; until then,
+changes are limited to new optional fields and new rule ids.
 Reference TypeScript types: `src/contract.ts` (shipped from this package).
+Conformance checking: `dsh-vet validate <report.json>`.
 
 `dsh-vet/v1` defines a machine-readable audit report for a DeepSeek Harness
 (DSH) plugin. It is implementation-agnostic: any scanner may emit it, and any
@@ -152,8 +156,9 @@ confidence ≥ `medium` exist, for CI gating.
 
 ## Versioning
 
-`/v1` freezes at the v0.1 release of this package. Backward-compatible
-additions (new optional fields, new rule ids) stay in `/v1`; semantic changes
-get `/v2` with a migration note. Discussion happens in
+`/v1` has been additive-only since the v0.1 release of this package — new
+optional fields and new rule ids stay in `/v1`; semantic changes get `/v2`
+with a migration note. The formal freeze follows the v0.3 marketplace-feedback
+round: afterwards even additive changes land only after public discussion in
 [GitHub Discussions](https://github.com/rogerdigital/dsh-vet/discussions)
 and the [dsh-plugin topic](https://github.com/topics/dsh-plugin).

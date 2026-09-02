@@ -6,10 +6,12 @@ Security vetting for DeepSeek Harness (DSH) plugins: permission & supply-chain
 audits before install, graded via the open [`dsh-vet/v1`](docs/dsh-vet-v1.md)
 report standard.
 
-> **Status: v0.1 shipped.** [`dsh-vet@0.1.0` is live on npm](https://www.npmjs.com/package/dsh-vet) —
-> reference scanner, 15 calibrated rules, public rule rationales, and an
-> 11-package ecosystem sweep record. v0.2 (author-side CI + badges) is next
-> on the [roadmap](ROADMAP.md).
+> **Status: v0.3 underway.** v0.2 shipped the author side — reference
+> scanner ([npm](https://www.npmjs.com/package/dsh-vet), 16 calibrated rules
+> with public rationales), CI Action, and auditable grade badges live in two
+> repos. v0.3 is the ecosystem round: report validation for consumers, the
+> verified-emitter program, and marketplace adoption before the contract's
+> formal freeze ([roadmap](ROADMAP.md)).
 
 ## Install
 
@@ -31,6 +33,7 @@ npx dsh-vet <specifier>          # npm package, git URL, or local path
 npx dsh-vet --json <specifier>   # dsh-vet/v1 report on stdout
 npx dsh-vet --strict <specifier> # exit 1 on findings >= high (confidence >= medium)
 npx dsh-vet --rules dep.install-scripts <specifier>
+npx dsh-vet validate <report.json> # check a report against the contract
 ```
 
 Any completed report exits `0` — grades describe findings, they do not gate.
@@ -104,8 +107,12 @@ The differentiating piece is not another scanner — it is
 deterministic JSON report contract (findings with severity **and confidence**,
 derived A–F grades) that any scanner may emit and any marketplace, CI job, or
 UI may consume, in the spirit of the community's `dsh-doctor/v1` contract.
-The TypeScript reference types ship from this package; third-party emitters
-are welcome and listed here once verified.
+The TypeScript reference types and the reference markdown renderer ship from
+this package; `dsh-vet validate` checks any report against the contract —
+including the derived grade, so a report from an emitter you don't know can't
+forge one. Third-party emitters are welcome and
+[listed once verified](docs/emitters.md); marketplaces can start from
+[docs/adopt-marketplace.md](docs/adopt-marketplace.md).
 
 ## How it differs
 
@@ -127,12 +134,13 @@ rules get re-examined and the rule set gets corrected in public.
 
 ## Roadmap
 
-- **v0.1** — contract frozen; reference CLI (`dsh vet <pkg>`) with the four
-  check families above
+- **v0.1** — contract shipped (stable, additive-only since 0.1.0) + reference
+  CLI (`dsh-vet <pkg>`) with the four check families above
 - **v0.2** — GitHub Action + badge so plugin authors self-audit and publish
   their grade
-- **v0.3** — marketplace integrations render `dsh-vet/v1` reports; contract
-  adopted by at least one third-party emitter
+- **v0.3** — ecosystem round: `dsh-vet validate` + the verified-emitter
+  program, marketplace integrations rendering `dsh-vet/v1` reports, and the
+  contract's formal freeze after the feedback round
 
 The detailed, trackable plan — task breakdowns, recorded decisions,
 definitions of done, risks, and kill criteria — lives in

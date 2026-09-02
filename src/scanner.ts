@@ -12,7 +12,7 @@ import type { VetFinding, VetReport } from './contract.ts'
 import { runRules } from './rules/index.ts'
 
 /** Kept in lockstep with package.json; a test asserts they match. */
-export const SCANNER_VERSION = '0.2.6'
+export const SCANNER_VERSION = '0.3.0'
 
 /**
  * A scan that audited zero JavaScript files must not read as a clean pass —

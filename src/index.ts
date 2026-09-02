@@ -10,6 +10,7 @@
 export {
   SCHEMA_ID,
   RULE_ID_PATTERN,
+  SEVERITY_RANK,
   countFindings,
   createReport,
   gradeFor,
@@ -56,6 +57,12 @@ export type { ScanOptions } from './scanner.ts'
 
 export { renderBadge } from './badge.ts'
 export type { ShieldsEndpointBadge } from './badge.ts'
+
+export { renderMarkdown } from './render.ts'
+export type { RenderMarkdownOptions } from './render.ts'
+
+export { validateReport } from './validate.ts'
+export type { ValidationIssue, ValidationResult } from './validate.ts'
 
 export { runCli } from './cli.ts'
 export type { CliIo } from './cli.ts'
