@@ -25,7 +25,7 @@ jobs:
       - uses: ./action
         with:
           specifier: 'dsh-vet'
-          version: '0.2.6'
+          version: '0.3.0'
           commit-report: true
 
   # Exercise the working-tree action on every PR: the published tag lags the
@@ -37,5 +37,5 @@ jobs:
       - uses: ./action
         with:
           specifier: 'fixtures/offender-kitchen-sink'
-          version: '0.2.6'
+          version: '0.3.0'
           comment: 'false'
