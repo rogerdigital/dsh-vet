@@ -140,7 +140,8 @@ marketplace pitch (`docs/adopt-marketplace.md`), and the announcement
 drafts (`docs/outreach/`). The first outreach round went live on 2026-09-02:
 the [#1115 contract follow-up](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18247257),
 [Show Your Plugins post](https://github.com/deepseek-ai/deepseek-harness/discussions/5423),
-[awesome-list PR](https://github.com/0xsline/awesome-deepseek-harness/pull/556),
+[awesome-list PR](https://github.com/0xsline/awesome-deepseek-harness/pull/556)
+(merged 2026-09-03 — dsh-vet is listed),
 and [dsh-plugin-audit collaboration issue](https://github.com/jkrandom-sudo/dsh-plugin-audit/issues/8).
 What remains is collecting feedback, securing marketplace and emitter
 adoption, and only then announcing the freeze.
@@ -153,6 +154,7 @@ adoption, and only then announcing the freeze.
 - [x] announcements: [reply under deepseek-harness#1115](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18247257),
   [Show Your Plugins post](https://github.com/deepseek-ai/deepseek-harness/discussions/5423),
   and [awesome-list PR](https://github.com/0xsline/awesome-deepseek-harness/pull/556)
+  (merged 2026-09-03)
 - [x] explore a complementary narrative with `dsh-plugin-audit`
   (static report + runtime sentinel) — [collaboration issue](https://github.com/jkrandom-sudo/dsh-plugin-audit/issues/8)
 
