@@ -163,6 +163,15 @@ emitter verified; contract frozen.
 
 ## Cross-cutting disciplines
 
+### Proposed release and upgrade risk review work
+
+The [release-risk development plan](docs/superpowers/plans/2026-09-10-release-risk-development-plan.md)
+defines a proposed extension of the existing static report workflow: scan
+context and coverage, comparable release reports, and PR risk-change summaries
+first; policy, artifact matching, and calibration follow through separate
+milestone gates. Implementation has not started. This plan does not replace
+the v0.3 adoption and contract-freeze criteria above.
+
 - **Determinism is a product feature**, not a test detail: sorted findings,
   derived summary, no ambient state beyond `scanner.ranAt`.
 - **Conservative severity.** The cost of a false positive (an author's
