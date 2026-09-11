@@ -35,6 +35,8 @@ export interface ResolvedTarget {
   files?: string[]
   /** Links found in the tarball that were deliberately not materialized. */
   skippedLinks?: Array<{ path: string; type: string; target: string }>
+  /** SHA-256 over the exact archive bytes, when an archive was consumed. */
+  archiveDigest?: string
   cleanup: () => void
 }
 
@@ -127,6 +129,7 @@ async function resolveNpm(specifier: string, opts: ResolveOptions): Promise<Reso
 
   const tarball = await fetchBuffer(dist.tarball, opts)
   verifyIntegrity(tarball, dist.integrity, dist.shasum)
+  const archiveDigest = `sha256:${createHash('sha256').update(tarball).digest('hex')}`
   const work = tmpWorkspace()
   try {
     const extracted = extractTarball(tarball, work)
@@ -139,6 +142,7 @@ async function resolveNpm(specifier: string, opts: ResolveOptions): Promise<Reso
       rootDir: work,
       files: extracted.files,
       skippedLinks: extracted.skipped,
+      archiveDigest,
       cleanup: () => cleanupDir(work),
     }
   } catch (err) {

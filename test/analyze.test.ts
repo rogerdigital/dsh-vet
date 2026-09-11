@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -174,6 +174,64 @@ describe('analyze', () => {
     try {
       const a = analyze(dir)
       expect(a.entries).toEqual(['bin/m.js', 'dist/cjs.js', 'dist/esm.js'])
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('analysis inputs and omissions', () => {
+  it('captures package.json and analyzed JS as identity inputs with exact bytes', () => {
+    const dir = fixture({
+      'package.json': '{"name":"m","main":"index.js"}',
+      'index.js': 'export const x = 1',
+      'README.md': 'not analyzed',
+    })
+    try {
+      const a = analyze(dir)
+      expect(a.inputs.map((input) => input.path)).toEqual(['package.json', 'index.js'])
+      expect(a.inputs[1]!.bytes.byteLength).toBe(Buffer.byteLength('export const x = 1'))
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('works without a package.json at all', () => {
+    const dir = fixture({ 'index.js': 'export const x = 1' })
+    try {
+      const a = analyze(dir)
+      expect(a.pkg).toBeNull()
+      expect(a.inputs.map((input) => input.path)).toEqual(['index.js'])
+      // The implicit index.js entry resolves, so it is not "unresolved".
+      expect(a.entries).toEqual(['index.js'])
+      expect(a.unresolvedEntries).toEqual([])
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('records symlinks as omissions and never reads through them', () => {
+    const dir = fixture({ 'package.json': '{"name":"m","main":"index.js"}', 'index.js': 'export const x = 1' })
+    try {
+      symlinkSync('index.js', join(dir, 'link.js'))
+      const a = analyze(dir)
+      expect(a.files.map((f) => f.path)).toEqual(['index.js'])
+      expect(a.omissions).toEqual([{ reason: 'symlink', path: 'link.js' }])
+      expect(a.inputs.map((input) => input.path)).toEqual(['package.json', 'index.js'])
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('separates unresolved entries from non-JS resolvable hints', () => {
+    const dir = fixture({
+      'package.json': '{"name":"m","main":"index.js","exports":{"./package.json":"./package.json"}}',
+      'index.js': 'export const x = 1',
+    })
+    try {
+      const a = analyze(dir)
+      expect(a.entries).toEqual(['index.js'])
+      expect(a.unresolvedEntries).toEqual([])
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }

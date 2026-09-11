@@ -33,7 +33,7 @@ export function buildTar(
 }
 
 export function gzippedTar(
-  entries: Array<{ name: string; data?: string | Buffer; type?: string; mode?: number }>,
+  entries: Array<{ name: string; data?: string | Buffer; type?: string; linkname?: string; mode?: number }>,
 ): Buffer {
   return gzipSync(buildTar(entries))
 }

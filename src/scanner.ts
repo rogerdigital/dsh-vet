@@ -5,14 +5,93 @@
  */
 
 import { analyze } from './analyze.ts'
+import type { Analysis } from './analyze.ts'
 import { resolveTarget } from './resolve.ts'
-import type { ResolveOptions } from './resolve.ts'
+import type { ResolvedTarget, ResolveOptions } from './resolve.ts'
 import { createReport } from './contract.ts'
 import type { VetFinding, VetReport } from './contract.ts'
-import { runRules } from './rules/index.ts'
+import { runRules, ruleIds } from './rules/index.ts'
+import { ANALYSIS_INPUT_DIGEST_KIND, profileDigest } from './scan-context.ts'
+import type { ScanContextV1, ScanOmissionV1 } from './scan-context.ts'
+import { analysisInputDigest } from './identity.ts'
 
 /** Kept in lockstep with package.json; a test asserts they match. */
 export const SCANNER_VERSION = '0.3.0'
+
+/**
+ * Fixed limitations of the reference scanner's scope, reported even on
+ * complete coverage: `complete` means complete within this scope, nothing
+ * broader. Sorted: coverage validation requires it.
+ */
+const FIXED_LIMITATIONS = [
+  'dependencies are not scanned',
+  'non-JavaScript files and executables are not analyzed',
+  'static analysis cannot observe runtime-computed behavior',
+].sort()
+
+const compareText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
+
+/** The automatic empty-audit check runs on every scan, alongside selected rules. */
+function effectiveRuleIds(options: ScanOptions): string[] {
+  return [...new Set([...(options.rules ?? ruleIds()), 'scan.empty-audit'])].sort(compareText)
+}
+
+function isFullRuleSelection(options: ScanOptions): boolean {
+  if (!options.rules) return true
+  const all = new Set(ruleIds())
+  return options.rules.length === all.size && options.rules.every((id) => all.has(id))
+}
+
+function scanOmissions(analysis: Analysis, resolved?: ResolvedTarget): ScanOmissionV1[] {
+  const omissions: ScanOmissionV1[] = analysis.omissions.map((omit) => ({ ...omit }))
+  for (const link of resolved?.skippedLinks ?? []) {
+    omissions.push({ reason: 'archive-link-skipped', path: link.path, detail: `${link.type} → ${link.target}` })
+  }
+  return omissions.sort((a, b) => compareText(a.path, b.path) || compareText(a.reason, b.reason))
+}
+
+function buildScanContext(analysis: Analysis, options: ScanOptions, resolved?: ResolvedTarget): ScanContextV1 {
+  const rules = effectiveRuleIds(options)
+  const profileFields = {
+    analyzerRevision: `dsh-vet-analyzer/${SCANNER_VERSION}`,
+    ruleCatalogRevision: `dsh-vet-rules/${SCANNER_VERSION}`,
+    rules,
+    options: {},
+  }
+  const omissions = scanOmissions(analysis, resolved)
+  const failedFiles = analysis.files
+    .filter((file) => file.parseError !== null)
+    .map((file) => file.path)
+    .sort(compareText)
+  const partial =
+    analysis.files.length === 0 ||
+    failedFiles.length > 0 ||
+    analysis.unresolvedEntries.length > 0 ||
+    omissions.length > 0 ||
+    !isFullRuleSelection(options)
+  return {
+    version: 1,
+    profile: { ...profileFields, digest: profileDigest(profileFields) },
+    coverage: {
+      status: partial ? 'partial' : 'complete',
+      candidateJs: analysis.files.length,
+      parsed: analysis.files.length - failedFiles.length,
+      parseFailures: failedFiles.length,
+      failedFiles,
+      entries: { resolved: analysis.entries, unresolved: analysis.unresolvedEntries },
+      omissions,
+      dependencyMode: 'not-scanned',
+      limitations: FIXED_LIMITATIONS,
+    },
+    subject: {
+      ...(analysis.pkg?.name ? { packageName: analysis.pkg.name } : {}),
+      analysisInputDigest: analysisInputDigest(analysis.inputs),
+      digestKind: ANALYSIS_INPUT_DIGEST_KIND,
+      ...(resolved?.archiveDigest ? { archiveDigest: resolved.archiveDigest } : {}),
+    },
+    observations: [],
+  }
+}
 
 /**
  * A scan that audited zero JavaScript files must not read as a clean pass —
@@ -52,6 +131,7 @@ export async function scanDirectory(dir: string, options: ScanOptions = {}): Pro
       ranAt: options.now?.() ?? new Date().toISOString(),
     },
     findings,
+    context: buildScanContext(analysis, options),
   })
 }
 
@@ -69,6 +149,7 @@ export async function scan(specifier: string, options: ScanOptions = {}): Promis
         ranAt: options.now?.() ?? new Date().toISOString(),
       },
       findings,
+      context: buildScanContext(analysis, options, resolved),
     })
   } finally {
     resolved.cleanup()
