@@ -57,6 +57,25 @@ describe('renderDiffText', () => {
     expect(text).toContain('outbound-host · index.js · b.example.com')
   })
 
+  it('states the package-level static scope on every result', async () => {
+    const comparable = renderDiffText(
+      await diffOf(
+        { 'package.json': PKG, 'index.js': 'export const x = 1' },
+        { 'package.json': PKG, 'index.js': 'export const x = 2' },
+      ),
+    )
+    expect(comparable).toContain('package-level static behavior only')
+    const incomparable = renderDiffText({
+      comparability: 'incomparable',
+      reasons: ['scanner-mismatch'],
+      base: { scanner: { name: 'a', version: '1', ranAt: 't' }, grade: 'A', subject: { analysisInputDigest: 'sha256:x' } },
+      head: { scanner: { name: 'a', version: '2', ranAt: 't' }, grade: 'A', subject: { analysisInputDigest: 'sha256:y' } },
+      findings: { added: [], removed: [], changed: [], unchanged: [] },
+      observations: { added: [], removed: [], countChanged: [], unchanged: [] },
+    } as never)
+    expect(incomparable).toContain('package-level static behavior only')
+  })
+
   it('renders incomparable results with reasons and the rescan guidance', () => {
     const diff = {
       schema: 'dsh-vet/diff/v1',

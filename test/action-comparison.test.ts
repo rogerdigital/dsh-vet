@@ -62,6 +62,26 @@ describe('renderComparisonMarkdown', () => {
     expect(md).toContain(RUN_URL)
   })
 
+  it('states the package-level static scope on every rendering', () => {
+    const comparable = renderComparisonMarkdown(
+      {
+        comparability: 'comparable',
+        reasons: [],
+        base: { grade: 'A' },
+        head: { grade: 'A' },
+        findings: { added: [], removed: [], changed: [] },
+        observations: { added: [] },
+      } as never,
+      { runUrl: RUN_URL },
+    )
+    expect(comparable).toContain('package-level static behavior only')
+    const incomparable = renderComparisonMarkdown(
+      { comparability: 'incomparable', reasons: ['profile-mismatch'], base: { grade: 'A' }, head: { grade: 'A' } } as never,
+      { runUrl: RUN_URL },
+    )
+    expect(incomparable).toContain('package-level static behavior only')
+  })
+
   it('discloses truncation beyond ten added findings', () => {
     const added = Array.from({ length: 13 }, (_, i) => ({
       rule: 'egress.outbound-endpoints',

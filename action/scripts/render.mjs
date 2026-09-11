@@ -84,6 +84,11 @@ export function renderCommentMarkdown(report, { runUrl }) {
 
 const COMPARISON_LIMIT = 10
 
+// Stated on every comparison section, per pilot feedback: the diff covers
+// package-level static behavior only.
+const SCOPE_NOTE =
+  '*Scope: package-level static behavior only — behavior that depends on the composed DSH profile or host version is not visible from the package alone.*'
+
 /** Report-derived text is untrusted: strip controls, escape markdown metacharacters. */
 export function escapeMarkdown(text) {
   return String(text)
@@ -112,6 +117,8 @@ export function renderComparisonMarkdown(diff, { runUrl }) {
       'When practical, rescan both artifacts with the same scanner and profile. ' +
         'An unavailable comparison is never a claim that nothing changed. ' +
         `Full result: the \`diff.json\` file in the [run's report artifact](${runUrl}).`,
+      '',
+      SCOPE_NOTE,
     )
     return lines.join('\n')
   }
@@ -134,6 +141,7 @@ export function renderComparisonMarkdown(diff, { runUrl }) {
       lines.push(`- …plus ${obsAdded.length} added observations (see the diff artifact)`)
     }
   }
+  lines.push('', SCOPE_NOTE)
   return lines.join('\n')
 }
 
