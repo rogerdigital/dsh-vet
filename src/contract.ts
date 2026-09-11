@@ -13,6 +13,8 @@
  * @module dsh-vet/contract
  */
 
+import type { ScanContextV1 } from './scan-context.ts'
+
 /** Literal `schema` value every dsh-vet/v1 report carries. */
 export const SCHEMA_ID = 'dsh-vet/v1' as const
 
@@ -96,6 +98,8 @@ export interface VetReport {
   readonly scanner: VetScanner
   readonly summary: VetSummary
   readonly findings: readonly VetFinding[]
+  /** Optional scan-context extension; see `docs/scan-context-v1.md`. */
+  readonly 'x-dsh-vet'?: ScanContextV1
 }
 
 /** Sort rank per severity, worst first; the contract's deterministic order. */
@@ -160,6 +164,8 @@ export interface CreateReportInput {
   target: VetTarget
   scanner: VetScanner
   findings: readonly VetFinding[]
+  /** Optional scan-context extension to attach as `x-dsh-vet`. */
+  context?: ScanContextV1
 }
 
 /**
@@ -183,5 +189,6 @@ export function createReport(input: CreateReportInput): VetReport {
     scanner: input.scanner,
     summary: { grade: gradeFor(findings), counts: countFindings(findings) },
     findings,
+    ...(input.context !== undefined ? { 'x-dsh-vet': input.context } : {}),
   }
 }

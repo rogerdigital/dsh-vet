@@ -64,5 +64,27 @@ export type { RenderMarkdownOptions } from './render.ts'
 export { validateReport } from './validate.ts'
 export type { ValidationIssue, ValidationResult } from './validate.ts'
 
+export {
+  ANALYSIS_INPUT_DIGEST_KIND,
+  SCAN_CONTEXT_KEY,
+  SCAN_CONTEXT_VERSION,
+  SHA256_PATTERN,
+  canonicalJson,
+  checkScanContext,
+  profileDigest,
+  sha256Hex,
+} from './scan-context.ts'
+export type {
+  DependencyMode,
+  ScanContextCheck,
+  ScanContextV1,
+  ScanCoverageStatus,
+  ScanCoverageV1,
+  ScanObservationV1,
+  ScanOmissionV1,
+  ScanProfileV1,
+  ScanSubjectV1,
+} from './scan-context.ts'
+
 export { runCli } from './cli.ts'
 export type { CliIo } from './cli.ts'
