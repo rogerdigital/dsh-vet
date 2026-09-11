@@ -10,6 +10,7 @@
  */
 
 import type { VetReport } from './contract.ts'
+import { coverageOf } from './scan-context.ts'
 
 export interface RenderMarkdownOptions {
   /** Link to the CI run or page hosting the full report. */
@@ -22,7 +23,7 @@ export function renderMarkdown(report: VetReport, options: RenderMarkdownOptions
     '<!-- dsh-vet:pr-comment -->',
     '## dsh-vet report',
     '',
-    `**Grade: ${report.summary.grade}** · audited \`${report.target.specifier}\` · [run](${options.runUrl}) · report uploaded as the \`dsh-vet-report\` artifact`,
+    `**Grade: ${report.summary.grade}** · coverage: ${coverageOf(report)} · audited \`${report.target.specifier}\` · [run](${options.runUrl}) · report uploaded as the \`dsh-vet-report\` artifact`,
     '',
     `| critical | high | medium | low | info |`,
     `| --- | --- | --- | --- | --- |`,

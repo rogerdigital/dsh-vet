@@ -8,6 +8,7 @@
  */
 
 import type { VetGrade, VetReport } from './contract.ts'
+import { coverageOf } from './scan-context.ts'
 
 export interface ShieldsEndpointBadge {
   schemaVersion: 1
@@ -28,10 +29,20 @@ const GRADE_COLOR: Record<VetGrade, string> = {
 
 export function renderBadge(report: VetReport): ShieldsEndpointBadge {
   const grade = report.summary.grade
+  const coverage = coverageOf(report)
+  // A partial or unknown-coverage scan never presents an unqualified pass.
+  const qualifier =
+    grade === 'X'
+      ? ''
+      : coverage === 'partial'
+        ? ' (partial)'
+        : coverage === 'unknown'
+          ? ' (coverage unknown)'
+          : ''
   return {
     schemaVersion: 1,
     label: 'dsh-vet',
-    message: grade === 'X' ? 'scan failed' : `grade ${grade}`,
+    message: grade === 'X' ? 'scan failed' : `grade ${grade}${qualifier}`,
     color: GRADE_COLOR[grade],
     ...(grade === 'X' ? { isError: true } : {}),
   }

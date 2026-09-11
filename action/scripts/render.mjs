@@ -1,16 +1,34 @@
 // Pure rendering for dsh-vet CI output: PR-comment markdown and the shields
 // badge JSON. No side effects, no deps — importable from tests.
+// Kept byte-identical to src/render.ts output by test/render.test.ts.
 
 const GRADE_COLOR = {
   A: 'brightgreen', B: 'green', C: 'yellow', D: 'orange', F: 'red', X: 'lightgrey',
 }
 
+function coverageOf(report) {
+  const context = report['x-dsh-vet']
+  if (
+    context &&
+    typeof context === 'object' &&
+    context.version === 1 &&
+    context.coverage &&
+    typeof context.coverage.status === 'string' &&
+    ['complete', 'partial', 'unknown'].includes(context.coverage.status)
+  ) {
+    return context.coverage.status
+  }
+  return 'unknown'
+}
+
 export function renderBadgeJson(report) {
   const grade = report.summary.grade
+  const coverage = coverageOf(report)
+  const qualifier = grade === 'X' ? '' : coverage === 'partial' ? ' (partial)' : coverage === 'unknown' ? ' (coverage unknown)' : ''
   return {
     schemaVersion: 1,
     label: 'dsh-vet',
-    message: grade === 'X' ? 'scan failed' : `grade ${grade}`,
+    message: grade === 'X' ? 'scan failed' : `grade ${grade}${qualifier}`,
     color: GRADE_COLOR[grade] ?? 'lightgrey',
     ...(grade === 'X' ? { isError: true } : {}),
   }
@@ -22,7 +40,7 @@ export function renderCommentMarkdown(report, { runUrl }) {
     '<!-- dsh-vet:pr-comment -->',
     '## dsh-vet report',
     '',
-    `**Grade: ${report.summary.grade}** · audited \`${report.target.specifier}\` · [run](${runUrl}) · report uploaded as the \`dsh-vet-report\` artifact`,
+    `**Grade: ${report.summary.grade}** · coverage: ${coverageOf(report)} · audited \`${report.target.specifier}\` · [run](${runUrl}) · report uploaded as the \`dsh-vet-report\` artifact`,
     '',
     `| critical | high | medium | low | info |`,
     `| --- | --- | --- | --- | --- |`,

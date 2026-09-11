@@ -227,6 +227,16 @@ export function checkScanContext(report: unknown): ScanContextCheck {
   return { state: 'validated', context: value as unknown as ScanContextV1 }
 }
 
+/**
+ * User-facing coverage of a report: the validated extension's status, or
+ * `unknown` when the extension is absent, unsupported, or invalid. Missing
+ * coverage data never reads as complete.
+ */
+export function coverageOf(report: unknown): 'complete' | 'partial' | 'unknown' {
+  const check = checkScanContext(report)
+  return check.state === 'validated' ? check.context.coverage.status : 'unknown'
+}
+
 function validateContextV1(
   context: Record<string, unknown>,
   at: string,
