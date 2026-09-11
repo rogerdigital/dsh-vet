@@ -71,6 +71,26 @@ because the delta surfaces it, which is the point of the workflow.
   gate stays closed until a maintainer uses the comparison on real
   releases repeatedly and reports the friction.
 
+## External feedback (pending)
+
+No external maintainer has used the comparison yet — this section stays
+empty until one does, and a friendly reply is not adoption. The ask and
+its per-plugin pre-run results live in
+[`docs/outreach/release-risk-pilot-ask.md`](outreach/release-risk-pilot-ask.md);
+record each thread here as it happens.
+
+Intake questions (mirroring the plan's §10 usefulness criteria):
+
+1. Does the reported delta match what the author intended to change?
+2. Anything the scanner missed or got wrong?
+3. Any entries that felt like noise?
+4. Would they read it on their PRs — and did they run it on a *second*
+   release? (The repeated-use answer is the M2 entry gate.)
+
+| Date | Plugin | Thread | Verdict (used / not / second release) |
+|---|---|---|---|
+| — | — | — | — |
+
 ## Reproduction
 
 ```sh
