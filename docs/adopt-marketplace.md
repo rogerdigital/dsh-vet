@@ -48,8 +48,16 @@ grade from the findings, so an emitter cannot assert a grade its evidence
 does not support:
 
 ```sh
-npx dsh-vet validate report.json && echo trustworthy-shape
+npx dsh-vet validate report.json && echo structurally-conformant
 ```
+
+`validate` proves structural conformance only. It does not prove
+completeness (that the emitter ran every check and omitted nothing),
+artifact identity (that the report describes the plugin version you are
+serving), or provenance (who produced the report). For those guarantees,
+fetch reports through channels you control — the Action's report branch in
+the author's own repo, or a scan you run yourself — and treat reports from
+unverified emitters as unreviewed claims.
 
 ## Consumer rules (from the spec)
 

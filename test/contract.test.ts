@@ -53,6 +53,12 @@ describe('gradeFor', () => {
   it('never lowers a grade for info severity', () => {
     expect(gradeFor([finding({ id: 'meta.no-license', severity: 'info' })])).toBe('A')
   })
+
+  it('matches the documented grade table: only ungraded findings keep an A', () => {
+    expect(gradeFor([finding({ id: 'meta.no-license', severity: 'info', confidence: 'high' })])).toBe('A')
+    expect(gradeFor([finding({ id: 'egress.suspicious', severity: 'critical', confidence: 'low' })])).toBe('A')
+    expect(gradeFor([finding({ id: 'dep.unpinned', severity: 'low', confidence: 'medium' })])).toBe('B')
+  })
 })
 
 describe('createReport', () => {

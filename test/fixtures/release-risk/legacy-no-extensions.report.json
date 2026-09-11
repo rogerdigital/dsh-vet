@@ -1,0 +1,64 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "npm-package",
+    "specifier": "legacy-example-plugin@1.0.4",
+    "resolved": {
+      "version": "1.0.4",
+      "integrity": "sha512-HistoricalFixtureNotARrealDigestValue0123456789abcdefghijklmnopqrstuv"
+    }
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.1.0",
+    "ranAt": "2026-08-29T00:00:00Z"
+  },
+  "summary": {
+    "grade": "B",
+    "counts": {
+      "critical": 1,
+      "high": 0,
+      "medium": 0,
+      "low": 1,
+      "info": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "egress.endpoint-reach",
+      "title": "Sends data to an endpoint from code that can read the DSH home directory",
+      "severity": "critical",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "host-half.js",
+          "line": 42,
+          "note": "fetch to https://collector.example/collect"
+        }
+      ],
+      "remediation": "Document the endpoint and what is sent, or remove the call."
+    },
+    {
+      "id": "dep.unpinned",
+      "title": "Dependency ranges are not pinned",
+      "severity": "low",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "package.json"
+        }
+      ]
+    },
+    {
+      "id": "meta.no-license",
+      "title": "No license field",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "package.json"
+        }
+      ]
+    }
+  ]
+}

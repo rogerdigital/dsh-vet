@@ -101,12 +101,41 @@ initially broke vendor-prefixed check ids — do not repeat that.
 
 | Grade | Condition (over findings with confidence ≥ `medium`) |
 |---|---|
-| `A` | none, or only `info`/`low`-severity findings |
+| `A` | no graded findings — the report is empty, or every finding is `info`-severity or `low`-confidence |
 | `B` | worst graded finding is `low` |
 | `C` | worst graded finding is `medium` |
 | `D` | worst graded finding is `high` |
 | `F` | at least one `critical` |
 | `X` | scan incomplete or errored — never presented as the plugin's grade |
+
+## What validation proves — and what it does not
+
+`dsh-vet validate` checks **structural conformance** with this contract:
+field types and enums, rule-id shape, evidence presence, the deterministic
+sort, and — the load-bearing check — that `summary` is exactly what the
+`findings` derive. A conformant report cannot assert a grade its evidence
+does not support.
+
+It does not, and cannot, verify:
+
+- **Emitter honesty** — whether the emitter omitted findings or fabricated
+  evidence. Structural consistency is not evidence that the audit was
+  thorough.
+- **Completeness** — v1 records nothing about which files or rules a scan
+  covered. A subset scan's report is structurally indistinguishable from a
+  full one.
+- **Artifact identity** — nothing ties a report to the artifact you are
+  holding. `target.resolved.integrity` is recorded by the emitter, not
+  checked against your copy.
+- **Provenance** — who actually produced the report, and whether it changed
+  in transit.
+
+Those guarantees come from delivery channels, not from the report's shape:
+see [emitters.md](emitters.md) for how emitters are verified and
+[adopt-marketplace.md](adopt-marketplace.md) for consumer guidance. An
+optional scan-context extension (`x-dsh-vet`) that records coverage and
+content identity is planned; until it exists, absent coverage data means
+**unknown**, never complete.
 
 ## CLI recommendations (non-normative)
 

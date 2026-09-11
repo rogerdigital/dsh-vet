@@ -17,7 +17,9 @@ honesty.
    `dsh-vet validate` (`npx dsh-vet validate <report.json>`). Either path
    guarantees the derived summary, the deterministic sort, and well-formed
    rule ids; an emitter that hand-assembles reports and skips validation is
-   not verified.
+   not verified. Validation proves structure, not honesty — it cannot
+   detect omitted findings, which is why the remaining items on this list
+   exist.
 2. **Determinism.** Two runs over the same artifact with the same emitter
    version produce identical reports, `scanner.ranAt` aside.
 3. **Conservative severity.** Findings follow the severity ladder in the

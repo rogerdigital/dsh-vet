@@ -123,6 +123,40 @@ describe('validateReport', () => {
   })
 })
 
+describe('release-risk baseline: legacy reports and grading gates', () => {
+  const legacy = JSON.parse(
+    readFileSync(new URL('fixtures/release-risk/legacy-no-extensions.report.json', import.meta.url), 'utf8'),
+  ) as VetReport
+
+  /** Clone the legacy fixture, mutate it, return it as unknown — the validator's input type. */
+  function mutateLegacy(fn: (report: any) => void): unknown {
+    const report = structuredClone(legacy)
+    fn(report)
+    return report
+  }
+
+  it('validates a historical 0.1.0 report that carries no extensions', () => {
+    expect(legacy.scanner.version).toBe('0.1.0')
+    expect((legacy as unknown as Record<string, unknown>)['x-dsh-vet']).toBeUndefined()
+    expect(validateReport(legacy)).toEqual({ ok: true, issues: [] })
+  })
+
+  it('keeps low-confidence findings out of grading: critical/low does not force grade F', () => {
+    expect(legacy.findings.some((f) => f.severity === 'critical' && f.confidence === 'low')).toBe(true)
+    expect(legacy.summary.grade).toBe('B')
+  })
+
+  it('grades a low-severity finding as B, never A', () => {
+    expect(legacy.summary.grade).toBe('B')
+    const claimed = validateReport(mutateLegacy((r) => { r.summary.grade = 'A' }))
+    expect(claimed.ok).toBe(false)
+    expect(claimed.issues).toContainEqual({
+      path: 'summary.grade',
+      message: expect.stringContaining('derive'),
+    })
+  })
+})
+
 describe('validateReport against the corpus', () => {
   const ROOT = fileURLToPath(new URL('..', import.meta.url))
   const files = [
