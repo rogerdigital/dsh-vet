@@ -237,3 +237,70 @@ describe('analysis inputs and omissions', () => {
     }
   })
 })
+
+describe('# subpath imports (package.json imports map)', () => {
+  it('resolves # specifiers through the imports map, node condition over default', () => {
+    // The importer sits in src/ while the mapped paths are package-root
+    // relative — imports-map values resolve like `exports`, not like
+    // relative specifiers.
+    const dir = fixture({
+      'package.json': JSON.stringify({
+        name: 'm',
+        main: 'src/index.js',
+        imports: {
+          '#internal': './lib/internal.js',
+          '#conditional': { node: './lib/node.js', default: './lib/browser.js' },
+        },
+      }),
+      'src/index.js': "import internal from '#internal'\nimport conditional from '#conditional'",
+      'lib/internal.js': 'export const x = 1',
+      'lib/node.js': 'export const y = 2',
+      'lib/browser.js': 'export const z = 3',
+    })
+    try {
+      const a = analyze(dir)
+      expect(a.entries).toEqual(['src/index.js'])
+      expect(a.reachable.has('lib/internal.js')).toBe(true)
+      expect(a.reachable.has('lib/node.js')).toBe(true)
+      // The browser condition is not node resolution: correctly unreachable.
+      expect(a.reachable.has('lib/browser.js')).toBe(false)
+      expect(a.unreachable).toEqual(['lib/browser.js'])
+      // # specifiers are internal references, never external packages.
+      expect(a.files[0]!.externals).toEqual([])
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('resolves # specifiers in require and dynamic import too', () => {
+    const dir = fixture({
+      'package.json': '{"name":"m","main":"index.js","imports":{"#helpers":"./helpers.js"}}',
+      'index.js': "const h = require('#helpers')\nconst lazy = () => import('#helpers')",
+      'helpers.js': 'module.exports = {}',
+    })
+    try {
+      const a = analyze(dir)
+      expect(a.reachable.has('helpers.js')).toBe(true)
+      expect(a.unreachable).toEqual([])
+      expect(a.files[0]!.externals).toEqual([])
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('degrades to unreachable when the map is missing or too nested — no guessed match', () => {
+    const dir = fixture({
+      'package.json':
+        '{"name":"m","main":"index.js","imports":{"#deep":{"node":{"import":"./a.js"}}}}',
+      'index.js': "import a from '#deep'\nimport b from '#missing'",
+      'a.js': 'export const a = 1',
+    })
+    try {
+      const a = analyze(dir)
+      expect(a.unreachable).toEqual(['a.js'])
+      expect(a.files[0]!.externals).toEqual([])
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
