@@ -6,7 +6,7 @@
   },
   "scanner": {
     "name": "dsh-vet",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "ranAt": "2026-01-01T00:00:00.000Z"
   },
   "summary": {
@@ -78,8 +78,8 @@
   "x-dsh-vet": {
     "version": 1,
     "profile": {
-      "analyzerRevision": "dsh-vet-analyzer/0.3.0",
-      "ruleCatalogRevision": "dsh-vet-rules/0.3.0",
+      "analyzerRevision": "dsh-vet-analyzer/0.4.0",
+      "ruleCatalogRevision": "dsh-vet-rules/0.4.0",
       "rules": [
         "dep.floating-range",
         "dep.install-scripts",
@@ -99,7 +99,7 @@
         "scan.empty-audit"
       ],
       "options": {},
-      "digest": "sha256:bdb1319356361dcc82c030b26bf6fe602cf303b92fc095b75f71391862542ed2"
+      "digest": "sha256:d7a8a54b7a8b562724668f6643a004e9384e64bcd97ce49e00a93691820198fd"
     },
     "coverage": {
       "status": "partial",

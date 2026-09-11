@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.4.0
+
+- **New: every report records what the scan actually covered — the
+  `x-dsh-vet` scan-context extension, version 1.** Rule profile (analyzer
+  and catalog revisions, sorted effective rule ids including the automatic
+  empty-audit check, a derived profile digest), coverage (candidate/parsed/
+  failed counts with named files, resolved and unresolved entry hints,
+  known omissions, fixed limitations), content identity (an
+  analysis-input manifest digest over the exact bytes analysis consumed,
+  plus the exact archive digest for registry-resolved packages), and
+  stable finding identities. Spec: `docs/scan-context-v1.md`. Old reports
+  without the extension stay valid; consumers must read missing coverage
+  as *unknown*, never complete — the CLI, PR comments, and badges now say
+  so (`grade C · coverage: partial`, `grade A (coverage unknown)`).
+- **New: `dsh-vet diff` — compare two reports, release-review style.**
+  Produces `dsh-vet/diff/v1`: added / removed / changed findings matched
+  by stable identity (rule + variant + file + subject), behavior
+  observation deltas, and both sides of every severity / confidence /
+  count transition. Line moves and reformatting are not risk additions; a
+  second endpoint is. Two reports that cannot be honestly compared (scan-
+  ner, profile, subject-identity, coverage, or grade-X mismatches) return
+  `incomparable` with explicit reason codes instead of a diff that would
+  read as "nothing changed". Exit 0 comparable / 1 incomparable / 2 usage
+  or invalid reports. Also exported as `compareReports()`. Spec:
+  `docs/report-diff-v1.md`.
+- **New: optional `baseline-report` Action input** — PRs get a bounded,
+  escaped "what changed since the base revision" section in the comment
+  and job summary, with the full diff uploaded as an artifact. The
+  baseline must come from a trusted base revision; the action README
+  documents the merge-base recipe and the trust boundary.
+- Grading, rules, and report semantics unchanged — the extension is
+  additive; all previously valid reports still validate.
+
 ## 0.3.0
 
 - **New: `dsh-vet validate <report.json>` — the contract conformance gate

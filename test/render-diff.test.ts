@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { scanDirectory } from '../src/scanner.ts'
+import { SCANNER_VERSION, scanDirectory } from '../src/scanner.ts'
 import { compareReports } from '../src/compare.ts'
 import { renderDiffText } from '../src/render-diff.ts'
 import type { VetDiff } from '../src/compare.ts'
@@ -47,8 +47,8 @@ describe('renderDiffText', () => {
     )
     const lines = text.split('\n')
     expect(lines[0]).toBe('dsh-vet diff · comparable')
-    expect(lines[1]!.startsWith('base: dsh-vet 0.3.0 · grade C · demo · sha256:')).toBe(true)
-    expect(lines[2]!.startsWith('head: dsh-vet 0.3.0 · grade C · demo · sha256:')).toBe(true)
+    expect(lines[1]!.startsWith(`base: dsh-vet ${SCANNER_VERSION} · grade C · demo · sha256:`)).toBe(true)
+    expect(lines[2]!.startsWith(`head: dsh-vet ${SCANNER_VERSION} · grade C · demo · sha256:`)).toBe(true)
     const addedIndex = text.indexOf('added findings')
     const gradeIndex = text.indexOf('grade: C → C (secondary context)')
     expect(addedIndex).toBeGreaterThan(-1)

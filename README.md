@@ -84,7 +84,7 @@ from your repo, so its value is auditable through git history and no badge
 service is involved:
 
 ```yaml
-- uses: rogerdigital/dsh-vet/action@v0.2.0
+- uses: rogerdigital/dsh-vet/action@v0.4.0
   with:
     specifier: '.'
     commit-report: true
