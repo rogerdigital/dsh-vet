@@ -79,3 +79,78 @@ export function renderCommentMarkdown(report, { runUrl }) {
   )
   return lines.join('\n')
 }
+
+// --- release comparison (baseline-report input) -----------------------------
+
+const COMPARISON_LIMIT = 10
+
+/** Report-derived text is untrusted: strip controls, escape markdown metacharacters. */
+export function escapeMarkdown(text) {
+  return String(text)
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .replace(/`/g, "'")
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function identityLine(identity) {
+  return `- \`${escapeMarkdown(identity.rule)}\` · \`${escapeMarkdown(identity.file)}\` · \`${escapeMarkdown(identity.subject)}\``
+}
+
+/** Render a dsh-vet/diff/v1 result as a bounded, escaped PR-comment section. */
+export function renderComparisonMarkdown(diff, { runUrl }) {
+  const lines = ['### dsh-vet release comparison', '']
+  if (diff.comparability !== 'comparable') {
+    lines.push(
+      '**Comparison unavailable** — these two reports cannot be trusted to describe the same subject under the same checks:',
+      '',
+    )
+    for (const reason of diff.reasons ?? []) lines.push(`- \`${escapeMarkdown(reason)}\``)
+    lines.push(
+      '',
+      'When practical, rescan both artifacts with the same scanner and profile. ' +
+        'An unavailable comparison is never a claim that nothing changed. ' +
+        `Full result: the \`diff.json\` file in the [run's report artifact](${runUrl}).`,
+    )
+    return lines.join('\n')
+  }
+  const added = diff.findings?.added ?? []
+  const removed = diff.findings?.removed ?? []
+  const changed = diff.findings?.changed ?? []
+  const obsAdded = diff.observations?.added ?? []
+  lines.push(
+    `**Comparison: comparable** — ${added.length} added · ${removed.length} removed · ${changed.length} changed ` +
+      `(grade \`${diff.base.grade}\` → \`${diff.head.grade}\`, secondary context). ` +
+      `Full result: the \`diff.json\` file in the [run's report artifact](${runUrl}).`,
+  )
+  if (added.length > 0 || obsAdded.length > 0) {
+    lines.push('', '**Added behavior:**')
+    for (const identity of added.slice(0, COMPARISON_LIMIT)) lines.push(identityLine(identity))
+    if (added.length > COMPARISON_LIMIT) {
+      lines.push(`- …and ${added.length - COMPARISON_LIMIT} more findings (truncated here; see the diff artifact)`)
+    }
+    if (obsAdded.length > added.length && obsAdded.length > COMPARISON_LIMIT) {
+      lines.push(`- …plus ${obsAdded.length} added observations (see the diff artifact)`)
+    }
+  }
+  return lines.join('\n')
+}
+
+/** Render the not-usable-at-all path: baseline configured but no result produced. */
+export function renderComparisonUnavailableMarkdown(reason) {
+  const bounded = String(reason).replace(/[\u0000-\u001f\u007f]/g, '').replace(/`/g, "'").slice(0, 400)
+  const truncated = String(reason).length > 400 ? ' (truncated)' : ''
+  return [
+    '### dsh-vet release comparison',
+    '',
+    '**Comparison unavailable** — the configured baseline could not be used:',
+    '',
+    '```',
+    bounded || 'no comparison result was produced',
+    '```' + truncated,
+    '',
+    'The scan report itself is unaffected and was uploaded as the report artifact. ' +
+      'Fix the baseline and rerun, or unset `baseline-report` to return to scan-only mode.',
+  ].join('\n')
+}

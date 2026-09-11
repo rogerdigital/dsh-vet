@@ -28,6 +28,13 @@ inputs:
   comment:
     description: 'Comment findings on pull requests (one comment, edited in place)'
     default: 'true'
+  baseline-report:
+    description: >-
+      Path to a baseline dsh-vet/v1 report to compare against (informational
+      delta summary on PRs and in the job summary). The bytes must come from
+      a trusted base revision — see the baseline recipe in action/README.md;
+      a path the PR head controls is not authoritative. Empty = scan-only.
+    default: ''
   commit-report:
     description: 'Publish report + badge to the dsh-vet/report branch on default-branch pushes'
     default: 'false'
@@ -67,7 +74,44 @@ runs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         COMMENT_ENABLED: ${{ inputs.comment }}
+        BASELINE_REPORT: ${{ inputs.baseline-report }}
       run: node ${{ github.action_path }}/scripts/post-results.mjs
+
+    - name: Compare against the baseline
+      id: compare
+      if: always() && steps.scan.outcome != 'skipped' && inputs.baseline-report != ''
+      continue-on-error: true
+      shell: bash
+      env:
+        BASELINE_REPORT: ${{ inputs.baseline-report }}
+      run: |
+        # Baseline bytes must come from a trusted base revision (recipe in
+        # action/README.md); a checked-in path the PR head controls is not an
+        # authoritative baseline. Inputs flow through env vars and quoted
+        # argument arrays only.
+        if [ ! -s .dsh-vet/report.json ]; then
+          echo "no report produced; nothing to compare"
+          exit 0
+        fi
+        if [ ! -f "$BASELINE_REPORT" ]; then
+          echo "baseline report not found: $BASELINE_REPORT" >&2
+          exit 2
+        fi
+        install_dir="${RUNNER_TEMP:-/tmp}/dsh-vet-action"
+        bin="$install_dir/node_modules/.bin/dsh-vet"
+        if [ ! -x "$bin" ]; then
+          npm install --prefix "$install_dir" --no-fund --no-audit "dsh-vet@${{ inputs.version }}"
+        fi
+        set +e
+        "$bin" diff --json "$BASELINE_REPORT" .dsh-vet/report.json > .dsh-vet/diff.json 2> .dsh-vet/diff-error.txt
+        code=$?
+        set -e
+        # Exit 2 (usage/read/validation) produced no result: keep only the
+        # diagnostics so the summary explains why comparison is unavailable.
+        if [ "$code" -eq 2 ]; then
+          rm -f .dsh-vet/diff.json
+        fi
+        exit "$code"
 
     - name: Upload report artifact
       if: always() && steps.scan.outcome != 'skipped'
@@ -75,7 +119,8 @@ runs:
       with:
         # Suffix with the job id: nothing stops a workflow from running this
         # action twice (e.g. an audit job plus a local-action smoke job), and
-        # artifact names are unique per run.
+        # artifact names are unique per run. Includes report.json, badge.json,
+        # and — when a baseline was configured — diff.json / diff-error.txt.
         name: dsh-vet-report-${{ github.job }}
         path: .dsh-vet/
         if-no-files-found: ignore
@@ -85,6 +130,13 @@ runs:
       shell: bash
       run: |
         echo "dsh-vet did not pass (scanner error or threshold breach); see steps above."
+        exit 1
+
+    - name: Fail on comparison outcome
+      if: always() && steps.compare.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "dsh-vet comparison against the configured baseline did not produce a usable result; see the comparison step and the summary above."
         exit 1
 
     - name: Publish report and badge to the dsh-vet/report branch
