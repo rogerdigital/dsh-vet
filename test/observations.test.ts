@@ -6,6 +6,7 @@ import { analyze } from '../src/analyze.ts'
 import { runRules } from '../src/rules/index.ts'
 import { deriveFindingIdentities, deriveObservations, normalizeHost, subjectHash } from '../src/observations.ts'
 import { RULES } from '../src/rules/index.ts'
+import { scanDirectory } from '../src/scanner.ts'
 
 function fixture(files: Record<string, string>): string {
   const dir = mkdtempSync(join(tmpdir(), 'dsh-vet-obs-'))
@@ -213,16 +214,21 @@ describe('deriveFindingIdentities', () => {
     }
   })
 
-  it('includes the empty-audit identity when the automatic check fires', () => {
+  it('includes the empty-audit identity when the automatic check fires', async () => {
     const dir = fixture({ 'package.json': '{"name":"ts-only","main":"dist/index.js"}' })
     try {
       mkdirSync(join(dir, 'src'))
       writeFileSync(join(dir, 'src', 'index.ts'), 'export const x = 1')
-      const analysis = analyze(dir)
-      const findings = runRules(analysis)
-      const identities = deriveFindingIdentities(analysis, findings, RULES, { emptyAuditRan: true })
-      expect(identities).toEqual([
-        { rule: 'scan.empty-audit', variant: 'audit', file: '.', subject: 'no-analyzable-javascript' },
+      const report = await scanDirectory(dir, { now: () => '2026-01-01T00:00:00.000Z' })
+      expect(report.findings.map((f) => f.id)).toEqual(['scan.empty-audit'])
+      expect(report['x-dsh-vet']!.findingIdentities).toEqual([
+        {
+          rule: 'scan.empty-audit',
+          variant: 'audit',
+          file: '.',
+          subject: 'no-analyzable-javascript',
+          finding: 0,
+        },
       ])
     } finally {
       rmSync(dir, { recursive: true, force: true })

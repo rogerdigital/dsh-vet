@@ -177,31 +177,36 @@
         "rule": "egress.outbound-endpoints",
         "variant": "endpoints",
         "file": "index.js",
-        "subject": "metrics.example.com"
+        "subject": "metrics.example.com",
+        "finding": 2
       },
       {
         "rule": "perm.network-client",
         "variant": "client",
         "file": "index.js",
-        "subject": "metrics.example.com"
+        "subject": "metrics.example.com",
+        "finding": 3
       },
       {
         "rule": "perm.seam-mismatch",
         "variant": "mismatch",
         "file": "index.js",
-        "subject": "fs"
+        "subject": "fs",
+        "finding": 1
       },
       {
         "rule": "perm.seam-mismatch",
         "variant": "mismatch",
         "file": "index.js",
-        "subject": "fs-write"
+        "subject": "fs-write",
+        "finding": 1
       },
       {
         "rule": "perm.undeclared-fs-write",
         "variant": "out-of-scope",
         "file": "index.js",
-        "subject": "/Users/shared-data"
+        "subject": "/Users/shared-data",
+        "finding": 0
       }
     ]
   }

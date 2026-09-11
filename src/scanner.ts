@@ -132,15 +132,19 @@ export async function scanDirectory(dir: string, options: ScanOptions = {}): Pro
   const findings = options.rules ? runRules(analysis, options.rules) : runRules(analysis)
   const emptyAuditRan = analysis.files.length === 0
   if (emptyAuditRan) findings.push(emptyAuditFinding(dir))
+  const scannerBlock = {
+    name: 'dsh-vet',
+    version: SCANNER_VERSION,
+    ranAt: options.now?.() ?? new Date().toISOString(),
+  }
+  // A draft report establishes the contract's deterministic finding order;
+  // identity indexes must point into that final order, not the pre-sort one.
+  const draft = createReport({ target: { kind: 'local-path', specifier: dir }, scanner: scannerBlock, findings })
   return createReport({
     target: { kind: 'local-path', specifier: dir },
-    scanner: {
-      name: 'dsh-vet',
-      version: SCANNER_VERSION,
-      ranAt: options.now?.() ?? new Date().toISOString(),
-    },
+    scanner: scannerBlock,
     findings,
-    context: buildScanContext(analysis, options, findings, emptyAuditRan),
+    context: buildScanContext(analysis, options, draft.findings, emptyAuditRan),
   })
 }
 
@@ -151,15 +155,17 @@ export async function scan(specifier: string, options: ScanOptions = {}): Promis
     const findings = options.rules ? runRules(analysis, options.rules) : runRules(analysis)
     const emptyAuditRan = analysis.files.length === 0
     if (emptyAuditRan) findings.push(emptyAuditFinding(specifier))
+    const scannerBlock = {
+      name: 'dsh-vet',
+      version: SCANNER_VERSION,
+      ranAt: options.now?.() ?? new Date().toISOString(),
+    }
+    const draft = createReport({ target: resolved.target, scanner: scannerBlock, findings })
     return createReport({
       target: resolved.target,
-      scanner: {
-        name: 'dsh-vet',
-        version: SCANNER_VERSION,
-        ranAt: options.now?.() ?? new Date().toISOString(),
-      },
+      scanner: scannerBlock,
       findings,
-      context: buildScanContext(analysis, options, findings, emptyAuditRan, resolved),
+      context: buildScanContext(analysis, options, draft.findings, emptyAuditRan, resolved),
     })
   } finally {
     resolved.cleanup()

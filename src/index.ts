@@ -92,5 +92,16 @@ export type {
 
 export { deriveFindingIdentities, deriveObservations, normalizeHost, subjectHash } from './observations.ts'
 
+export { DIFF_SCHEMA_ID, compareReports } from './compare.ts'
+export type {
+  CompareOptions,
+  DiffReason,
+  DiffSide,
+  DiffSubjectRef,
+  FindingTransition,
+  ObservationTransition,
+  VetDiff,
+} from './compare.ts'
+
 export { runCli } from './cli.ts'
 export type { CliIo } from './cli.ts'

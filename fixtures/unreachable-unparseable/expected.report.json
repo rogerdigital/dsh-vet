@@ -134,25 +134,29 @@
         "rule": "obf.eval-detect",
         "variant": "literal",
         "file": "orphan.js",
-        "subject": "eval:sha256:4a1b21d876ae00c8ed5c4d1cde09c61f8a61b50fe370a801b10c339831f370ab"
+        "subject": "eval:sha256:4a1b21d876ae00c8ed5c4d1cde09c61f8a61b50fe370a801b10c339831f370ab",
+        "finding": 1
       },
       {
         "rule": "obf.unparseable",
         "variant": "unparseable",
         "file": "broken.js",
-        "subject": "unparseable"
+        "subject": "unparseable",
+        "finding": 0
       },
       {
         "rule": "perm.unreachable-files",
         "variant": "unreachable",
         "file": "broken.js",
-        "subject": "unreachable"
+        "subject": "unreachable",
+        "finding": 2
       },
       {
         "rule": "perm.unreachable-files",
         "variant": "unreachable",
         "file": "orphan.js",
-        "subject": "unreachable"
+        "subject": "unreachable",
+        "finding": 2
       }
     ]
   }

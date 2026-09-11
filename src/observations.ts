@@ -111,11 +111,11 @@ export function deriveFindingIdentities(
   options: { emptyAuditRan: boolean },
 ): FindingIdentityV1[] {
   const counts = new Map<string, FindingIdentityV1 & { n: number }>()
-  const add = (rule: string, variant: string, file: string, subject: string): void => {
+  const add = (rule: string, variant: string, file: string, subject: string, finding: number): void => {
     const key = `${rule}\0${variant}\0${file}\0${subject}`
     const existing = counts.get(key)
     if (existing) existing.n += 1
-    else counts.set(key, { rule, variant, file, subject, n: 1 })
+    else counts.set(key, { rule, variant, file, subject, finding, n: 1 })
   }
 
   const byId = new Map<string, IdentityRule>()
@@ -123,22 +123,31 @@ export function deriveFindingIdentities(
     if (rule.subjects) byId.set(rule.id, { rule, variants: rule.variants ?? ['default'] })
   }
 
+  const ruleFindingIndexes = new Map<string, number[]>()
+  findings.forEach((finding, index) => {
+    const list = ruleFindingIndexes.get(finding.id) ?? []
+    list.push(index)
+    ruleFindingIndexes.set(finding.id, list)
+  })
+
   for (const [id, { rule, variants }] of byId) {
     const subjects = rule.subjects!({ analysis })
-    const emitted = findings.filter((finding) => finding.id === id)
+    const indexes = ruleFindingIndexes.get(id) ?? []
     const present = variants.filter((variant) => subjects.some((s) => s.variant === variant))
     // Defensive alignment: every finding must map to a variant and vice
     // versa, or the pair is untrustworthy and contributes nothing.
-    if (emitted.length !== present.length) continue
-    for (let i = 0; i < present.length; i++) {
-      const variant = present[i]!
+    if (indexes.length !== present.length) continue
+    present.forEach((variant, i) => {
       for (const subject of subjects.filter((s) => s.variant === variant)) {
-        add(id, variant, subject.file, subject.subject)
+        add(id, variant, subject.file, subject.subject, indexes[i]!)
       }
-    }
+    })
   }
 
-  if (options.emptyAuditRan) add('scan.empty-audit', 'audit', '.', 'no-analyzable-javascript')
+  if (options.emptyAuditRan) {
+    const index = findings.findIndex((finding) => finding.id === 'scan.empty-audit')
+    if (index >= 0) add('scan.empty-audit', 'audit', '.', 'no-analyzable-javascript', index)
+  }
 
   return [...counts.values()]
     .map(({ n, ...identity }) => (n > 1 ? { ...identity, count: n } : identity))
