@@ -64,6 +64,8 @@ export type { ShieldsEndpointBadge } from './badge.ts'
 export { renderMarkdown } from './render.ts'
 export type { RenderMarkdownOptions } from './render.ts'
 
+export { renderDiffText } from './render-diff.ts'
+
 export { validateReport } from './validate.ts'
 export type { ValidationIssue, ValidationResult } from './validate.ts'
 
@@ -74,6 +76,7 @@ export {
   SHA256_PATTERN,
   canonicalJson,
   checkScanContext,
+  coverageOf,
   profileDigest,
   sha256Hex,
 } from './scan-context.ts'

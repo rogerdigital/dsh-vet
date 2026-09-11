@@ -10,6 +10,9 @@ import { SCANNER_VERSION, scan, scanDirectory } from './scanner.ts'
 import type { VetReport } from './contract.ts'
 import { SCHEMA_ID, isGraded } from './contract.ts'
 import { renderBadge } from './badge.ts'
+import { coverageOf } from './scan-context.ts'
+import { compareReports } from './compare.ts'
+import { renderDiffText } from './render-diff.ts'
 import { validateReport } from './validate.ts'
 import { classifySpecifier } from './resolve.ts'
 import { existsSync } from 'node:fs'
@@ -20,6 +23,7 @@ export interface CliIo {
 }
 
 const USAGE = `usage: dsh-vet <specifier> [options]
+       dsh-vet diff <base.report.json> <head.report.json> [--json] [--subject <label>]
        dsh-vet badge <report.json>
        dsh-vet validate <report.json> [<report.json> ...]
 
@@ -31,6 +35,13 @@ const USAGE = `usage: dsh-vet <specifier> [options]
   --rules <ids>        comma-separated rule ids to run
   --version            print version
   --help               this text
+
+  diff                 compare two dsh-vet/v1 reports (dsh-vet/diff/v1):
+                       exit 0 for a comparable result regardless of risk
+                       changes, 1 when valid reports cannot be compared,
+                       2 on usage, unreadable files, or invalid reports.
+                       --subject supplies the shared label required to
+                       compare two local-directory scans
 
   badge                render a shields.io endpoint badge (JSON) from a
                        dsh-vet/v1 report file; used by CI to publish a grade
@@ -57,7 +68,7 @@ function humanSummary(report: VetReport): string {
       ? `${report.target.specifier}${resolved?.version ? ` (resolved ${resolved.version})` : ''}`
       : report.target.specifier
   lines.push(`dsh-vet ${SCANNER_VERSION} · ${report.target.kind} · ${what}`)
-  lines.push(`grade: ${report.summary.grade}`)
+  lines.push(`grade: ${report.summary.grade} · coverage: ${coverageOf(report)}`)
   const c = report.summary.counts
   lines.push(
     `findings: ${c.critical} critical · ${c.high} high · ${c.medium} medium · ${c.low} low · ${c.info} info`,
@@ -78,6 +89,9 @@ function humanSummary(report: VetReport): string {
 
 /** Parse and run; returns the process exit code. */
 export async function runCli(argv: string[], io: CliIo): Promise<number> {
+  if (argv[0] === 'diff') {
+    return runDiff(argv.slice(1), io)
+  }
   if (argv[0] === 'badge') {
     return runBadge(argv.slice(1), io)
   }
@@ -148,6 +162,62 @@ export async function runCli(argv: string[], io: CliIo): Promise<number> {
     io.stderr(`dsh-vet: ${(err as Error).message}`)
     return 2
   }
+}
+
+/**
+ * `dsh-vet diff <base.report.json> <head.report.json>` — compare two
+ * reports. Exit 0 for a comparable result regardless of risk changes,
+ * 1 when valid reports cannot be compared, 2 on usage, unreadable
+ * files, or reports that fail contract validation. JSON to stdout,
+ * diagnostics to stderr.
+ */
+function runDiff(argv: string[], io: CliIo): number {
+  let args: ReturnType<typeof parseArgs>
+  try {
+    args = parseArgs({
+      args: argv,
+      options: {
+        json: { type: 'boolean' },
+        subject: { type: 'string' },
+        help: { type: 'boolean' },
+      },
+      allowPositionals: true,
+    })
+  } catch (err) {
+    io.stderr(`${(err as Error).message}\n\n${USAGE}`)
+    return 2
+  }
+  if (args.values.help) {
+    io.stdout(USAGE)
+    return 0
+  }
+  const [basePath, headPath] = args.positionals
+  if (args.positionals.length !== 2 || basePath === undefined || headPath === undefined) {
+    io.stderr('diff expects exactly two report files\n\n' + USAGE)
+    return 2
+  }
+  const reports: unknown[] = []
+  for (const path of [basePath, headPath]) {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(readFileSync(path, 'utf8'))
+    } catch (err) {
+      io.stderr(`dsh-vet diff: cannot read report ${path}: ${(err as Error).message}`)
+      return 2
+    }
+    const { ok, issues } = validateReport(parsed)
+    if (!ok) {
+      io.stderr(`dsh-vet diff: ${path} is not a valid ${SCHEMA_ID} report:`)
+      for (const issue of issues) io.stderr(`  ${issue.path}: ${issue.message}`)
+      return 2
+    }
+    reports.push(parsed)
+  }
+  const diff = compareReports(reports[0], reports[1], {
+    ...(typeof args.values.subject === 'string' ? { subjectLabel: args.values.subject } : {}),
+  })
+  io.stdout(args.values.json ? JSON.stringify(diff, null, 2) : renderDiffText(diff))
+  return diff.comparability === 'comparable' ? 0 : 1
 }
 
 function runBadge(argv: string[], io: CliIo): number {

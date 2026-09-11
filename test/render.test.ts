@@ -20,6 +20,14 @@ describe('renderMarkdown', () => {
     expect(md).toContain('| 0 | 2 | 8 | 1 | 3 |')
     expect(md).toContain(`[run](${RUN_URL})`)
   })
+
+  it('shows coverage alongside the grade, unknown for legacy reports', () => {
+    expect(renderMarkdown(kitchenSink, { runUrl: RUN_URL })).toContain('coverage: complete')
+    const legacy = JSON.parse(
+      readFileSync(new URL('fixtures/release-risk/legacy-no-extensions.report.json', import.meta.url), 'utf8'),
+    ) as VetReport
+    expect(renderMarkdown(legacy, { runUrl: RUN_URL })).toContain('coverage: unknown')
+  })
 })
 
 describe('renderMarkdown stays identical to the action renderer', () => {

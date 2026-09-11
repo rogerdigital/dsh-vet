@@ -18,6 +18,16 @@ describe('renderBadge', () => {
     expect(at('F').color).toBe('red')
     expect(at('X')).toMatchObject({ message: 'scan failed', color: 'lightgrey', isError: true })
   })
+
+  it('qualifies partial and unknown coverage instead of an unqualified pass', () => {
+    const partial = structuredClone(kitchenSink) as { 'x-dsh-vet'?: { coverage: { status: string } } } & VetReport
+    partial['x-dsh-vet']!.coverage.status = 'partial'
+    expect(renderBadge(partial).message).toBe('grade D (partial)')
+    const legacy = JSON.parse(
+      readFileSync(new URL('../test/fixtures/release-risk/legacy-no-extensions.report.json', import.meta.url), 'utf8'),
+    ) as VetReport
+    expect(renderBadge(legacy).message).toBe('grade B (coverage unknown)')
+  })
 })
 
 describe('runCli badge', () => {

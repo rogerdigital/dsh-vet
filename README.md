@@ -34,11 +34,31 @@ npx dsh-vet --json <specifier>   # dsh-vet/v1 report on stdout
 npx dsh-vet --strict <specifier> # exit 1 on findings >= high (confidence >= medium)
 npx dsh-vet --rules dep.install-scripts <specifier>
 npx dsh-vet validate <report.json> # check a report against the contract
+npx dsh-vet diff base.report.json head.report.json --json
 ```
 
 Any completed report exits `0` — grades describe findings, they do not gate.
 Scanner failures exit non-zero. The scanner runs locally, reads the npm
 registry for dependency metadata only, and never transmits audited code.
+
+Every report records what the scan actually covered (`x-dsh-vet` scan
+context: rule profile, coverage, content digests, stable finding
+identities); human output and badges show coverage alongside the grade,
+and a missing context reads as `unknown`, never complete.
+
+### Comparing two reports (release review)
+
+`dsh-vet diff` compares two reports produced by the same scanner version
+and rule profile over complete scans, and reports what changed:
+[`dsh-vet/diff/v1`](docs/report-diff-v1.md) — added/removed/changed
+findings by stable identity, behavior-observation deltas, both sides of
+every transition. Exit `0` for a comparable result regardless of risk
+changes, `1` when the pair cannot be trusted to describe the same
+subject under the same checks (with explicit reasons), `2` on usage or
+invalid reports. Two local-directory scans additionally need
+`--subject <label>`. An incomparable pair is a prompt to rescan both
+artifacts with the same configuration — never a claim that nothing
+changed.
 
 Shipped rules (each with a public rationale under
 [`docs/rules/`](docs/rules)):
