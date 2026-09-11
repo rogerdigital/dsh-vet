@@ -54,10 +54,13 @@ Both grades stay `A` (unreachable files are informational); the delta is
 visible precisely because observations and identities are reported even
 when grades do not move.
 
-Honest limitation observed: `#`-subpath `imports` maps are not resolved,
-so code reached only through them reads as unreachable. That is a
-documented analyzer gap to close in a later revision — visible here
-because the delta surfaces it, which is the point of the workflow.
+Honest limitation observed: `#`-subpath `imports` maps were not resolved,
+so code reached only through them read as unreachable. That gap was
+visible here because the delta surfaced it, which is the point of the
+workflow — and it was closed the next revision cycle: the analyzer now
+resolves `#` specifiers through the imports map (node condition over
+default, package-root relative), leaving only genuinely browser-only
+variants unreachable.
 
 ## Pilot observations
 

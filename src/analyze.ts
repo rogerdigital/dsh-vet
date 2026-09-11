@@ -325,7 +325,7 @@ function inspectFile(analysis: Analysis, file: SourceFile, ast: Node): void {
         const source = (n as any).source
         if (source?.value) {
           file.imports.push({ specifier: source.value, line })
-          if (!source.value.startsWith('.')) file.externals.push(source.value)
+          if (!source.value.startsWith('.') && !source.value.startsWith('#')) file.externals.push(source.value)
           const spec = source.value.replace(/^node:/, '')
           if (here.type === 'ImportDeclaration') {
             for (const spec2 of (n as any).specifiers ?? []) {
@@ -350,7 +350,7 @@ function inspectFile(analysis: Analysis, file: SourceFile, ast: Node): void {
           const arg = staticString((init as any).arguments[0])
           if (arg !== null) {
             file.imports.push({ specifier: arg, line })
-            if (!arg.startsWith('.')) file.externals.push(arg)
+            if (!arg.startsWith('.') && !arg.startsWith('#')) file.externals.push(arg)
             bindings.set((n as any).id.name, { module: arg.replace(/^node:/, '') })
           }
         }
@@ -414,12 +414,12 @@ function inspectFile(analysis: Analysis, file: SourceFile, ast: Node): void {
             const value = staticString(arg)
             if (arg?.type === 'Literal' && value !== null) {
               file.imports.push({ specifier: value, line })
-              if (!value.startsWith('.')) file.externals.push(value)
+              if (!value.startsWith('.') && !value.startsWith('#')) file.externals.push(value)
             } else if (value !== null) {
               // Concatenated but statically recoverable: a real import edge
               // and an obfuscation signal at the same time.
               file.imports.push({ specifier: value, line })
-              if (!value.startsWith('.')) file.externals.push(value)
+              if (!value.startsWith('.') && !value.startsWith('#')) file.externals.push(value)
               analysis.dynamicImports.push({
                 file: file.path,
                 line,
@@ -559,6 +559,27 @@ function resolveRelative(rootDir: string, fromFile: string, spec: string): strin
       return toPosix(relative(rootDir, candidate))
     } catch {
       // try next
+    }
+  }
+  return null
+}
+
+/**
+ * Resolve a `#`-prefixed specifier through package.json `imports` — the
+ * internal subpath-imports map. The `node` condition wins over `default`,
+ * matching what the runtime loads; anything deeper than a one-level
+ * condition object stays unresolved: an honest miss, not a guessed match.
+ */
+function resolveImportsMap(pkg: PkgJson | null, specifier: string): string | null {
+  const imports = pkg?.raw['imports']
+  if (!imports || typeof imports !== 'object' || Array.isArray(imports)) return null
+  const entry = (imports as Record<string, unknown>)[specifier]
+  if (typeof entry === 'string') return entry
+  if (entry !== null && typeof entry === 'object' && !Array.isArray(entry)) {
+    const conditions = entry as Record<string, unknown>
+    for (const condition of ['node', 'default']) {
+      const value = conditions[condition]
+      if (typeof value === 'string') return value
     }
   }
   return null
@@ -706,8 +727,16 @@ export function analyze(rootDir: string): Analysis {
     if (!file) continue
     const targets: string[] = []
     for (const ref of file.imports) {
-      if (!ref.specifier.startsWith('.')) continue
-      const rel = resolveRelative(rootDir, current, ref.specifier)
+      // `#` specifiers resolve through the package's internal imports map;
+      // mapped paths are package-root relative (like `exports`), while bare
+      // specifiers stay external.
+      let rel: string | null = null
+      if (ref.specifier.startsWith('.')) {
+        rel = resolveRelative(rootDir, current, ref.specifier)
+      } else if (ref.specifier.startsWith('#')) {
+        const mapped = resolveImportsMap(pkg, ref.specifier)
+        rel = mapped === null ? null : resolveRelative(rootDir, 'package.json', mapped)
+      }
       if (rel && analysis.fileByPath.has(rel)) {
         targets.push(rel)
         if (!analysis.reachable.has(rel)) queue.push(rel)
