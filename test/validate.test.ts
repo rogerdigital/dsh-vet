@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { validateReport } from '../src/validate.ts'
 import type { VetReport } from '../src/contract.ts'
+import { profileDigest } from '../src/scan-context.ts'
 import { runCli } from '../src/cli.ts'
 
 const kitchenSink = JSON.parse(
@@ -154,6 +155,46 @@ describe('release-risk baseline: legacy reports and grading gates', () => {
       path: 'summary.grade',
       message: expect.stringContaining('derive'),
     })
+  })
+})
+
+describe('scan-context extension (x-dsh-vet)', () => {
+  const profile = {
+    analyzerRevision: 'dsh-vet-analyzer/0.3.0',
+    ruleCatalogRevision: 'dsh-vet-rules/0.3.0',
+    rules: ['egress.endpoint-reach'],
+    options: {},
+  }
+  const context = {
+    version: 1,
+    profile: { ...profile, digest: profileDigest(profile) },
+    coverage: {
+      status: 'partial',
+      candidateJs: 2,
+      parsed: 2,
+      parseFailures: 0,
+      failedFiles: [],
+      entries: { resolved: ['index.js'], unresolved: [] },
+      omissions: [],
+      dependencyMode: 'not-scanned',
+      limitations: ['static analysis of JavaScript sources only'],
+    },
+    subject: { analysisInputDigest: `sha256:${'b'.repeat(64)}`, digestKind: 'dsh-vet/analysis-input@1' },
+    observations: [],
+  }
+
+  it('validates a findings-bearing report with a version-1 extension', () => {
+    expect(validateReport(mutate((r) => { r['x-dsh-vet'] = context }))).toEqual({ ok: true, issues: [] })
+  })
+
+  it('rejects malformed known context, tolerates unknown fields and future versions', () => {
+    const malformed = validateReport(
+      mutate((r) => { r['x-dsh-vet'] = { ...context, coverage: { ...context.coverage, parsed: 9 } } }),
+    )
+    expect(malformed.ok).toBe(false)
+    expect(malformed.issues[0]!.path).toBe('x-dsh-vet.coverage.parsed')
+    expect(validateReport(mutate((r) => { r['x-dsh-vet'] = { ...context, 'x-vendor': 1 } })).ok).toBe(true)
+    expect(validateReport(mutate((r) => { r['x-dsh-vet'] = { version: 2, anything: true } })).ok).toBe(true)
   })
 })
 

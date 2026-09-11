@@ -132,10 +132,11 @@ It does not, and cannot, verify:
 
 Those guarantees come from delivery channels, not from the report's shape:
 see [emitters.md](emitters.md) for how emitters are verified and
-[adopt-marketplace.md](adopt-marketplace.md) for consumer guidance. An
-optional scan-context extension (`x-dsh-vet`) that records coverage and
-content identity is planned; until it exists, absent coverage data means
-**unknown**, never complete.
+[adopt-marketplace.md](adopt-marketplace.md) for consumer guidance. The
+optional scan-context extension ([scan-context-v1.md](scan-context-v1.md))
+records coverage and content identity; the reference scanner begins
+emitting it in a later release, and until a report carries it, absent
+coverage data means **unknown**, never complete.
 
 ## CLI recommendations (non-normative)
 

@@ -20,6 +20,7 @@ import {
   gradeFor,
 } from './contract.ts'
 import type { VetConfidence, VetGrade, VetSeverity } from './contract.ts'
+import { checkScanContext } from './scan-context.ts'
 
 export interface ValidationIssue {
   /** Dotted path into the report, e.g. `findings[2].evidence[0].line`. */
@@ -217,6 +218,15 @@ export function validateReport(report: unknown): ValidationResult {
         break
       }
     }
+  }
+
+  // The optional extension is strict for its version 1: malformed known
+  // context invalidates the report, while a future version stays a valid
+  // base report (reported as unsupported by checkScanContext, never
+  // trusted comparison metadata).
+  const contextCheck = checkScanContext(report)
+  if (contextCheck.state === 'invalid') {
+    issues.push(...contextCheck.issues)
   }
 
   return { ok: issues.length === 0, issues }
