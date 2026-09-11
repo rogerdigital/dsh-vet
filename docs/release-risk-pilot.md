@@ -93,8 +93,24 @@ Intake questions (mirroring the plan's §10 usefulness criteria):
 | Date | Plugin | Thread | Verdict (used / not / second release) |
 |---|---|---|---|
 | 2026-09-11 | dsh-doctor | [astra3294/dsh-doctor#9](https://github.com/astra3294/dsh-doctor/issues/9) | pending |
-| 2026-09-11 | dsh-wechat | [pan17/dsh-wechat#7](https://github.com/pan17/dsh-wechat/issues/7) | pending |
+| 2026-09-11 | dsh-wechat | [pan17/dsh-wechat#7](https://github.com/pan17/dsh-wechat/issues/7) | **used — validated; second release pending** ([reply](https://github.com/pan17/dsh-wechat/issues/7#issuecomment-5637153793)) |
 | 2026-09-11 | dsh-find-plugin | [awesome-dsh-plugin/dsh-find-plugin#11](https://github.com/awesome-dsh-plugin/dsh-find-plugin/issues/11) | pending |
+
+dsh-wechat reply takeaways (2026-09-11):
+
+- Zero-change result confirmed against release intent (0.9.6 changed
+  `/history` filtering/presentation only) — and the comparison "saved a
+  manual re-review".
+- Per-PR summary valued; the four requested properties (no-changes vs
+  incomparable distinction, prominent added/changed callouts,
+  comparability info, observations at unchanged grades) are already the
+  diff's design, which is good calibration evidence.
+- Requested limitation to surface visibly: results cover package-level
+  static behavior only — behavior depending on the composed DSH profile
+  or host version (runtime service contracts, registered
+  tools/commands, `ctx.inject`) is not visible from the package alone.
+  Action item: state this on every diff output and PR comparison
+  section, not only in coverage limitations.
 
 The announcement follow-up went out after 0.4.0 shipped:
 [deepseek-harness#1115](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18402967).
