@@ -6,6 +6,7 @@
 import { reachableFrom } from '../analyze.ts'
 import type { Rule } from '../rule.ts'
 import { capEvidence, finding } from '../rule.ts'
+import { normalizeHost } from '../observations.ts'
 
 function endpointOf(literal: string): string {
   try {
@@ -20,6 +21,17 @@ export const outboundEndpoints: Rule = {
   title: 'Outbound endpoints the code can contact',
   defaultSeverity: 'info',
   defaultConfidence: 'high',
+  variants: ['endpoints'],
+  subjects({ analysis }) {
+    const byHost = new Map<string, string>()
+    for (const use of analysis.netUses) {
+      for (const literal of use.literals) {
+        const host = normalizeHost(literal)
+        if (host && !byHost.has(host)) byHost.set(host, use.file)
+      }
+    }
+    return [...byHost].map(([host, file]) => ({ variant: 'endpoints', file, subject: host }))
+  },
   check({ analysis }) {
     const byEndpoint = new Map<string, { file: string; line: number; snippet: string }>()
     for (const use of analysis.netUses) {
@@ -53,6 +65,18 @@ export const secretAdjacent: Rule = {
   title: 'Network calls reachable from code that reads secrets',
   defaultSeverity: 'high',
   defaultConfidence: 'low',
+  variants: ['secret-adjacent'],
+  subjects({ analysis }) {
+    const secretFiles = new Set(analysis.capUses.filter((u) => SECRET_CAPS.has(u.cap)).map((u) => u.file))
+    const out = []
+    for (const file of [...secretFiles].sort()) {
+      const netScope = [file, ...reachableFrom(analysis, file)]
+      if (analysis.netUses.some((u) => netScope.includes(u.file))) {
+        out.push({ variant: 'secret-adjacent', file, subject: 'secret-read-with-reachable-network' })
+      }
+    }
+    return out
+  },
   check({ analysis }) {
     const secretFiles = new Set(analysis.capUses.filter((u) => SECRET_CAPS.has(u.cap)).map((u) => u.file))
     const evidence = []

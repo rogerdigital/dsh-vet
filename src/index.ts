@@ -50,7 +50,7 @@ export { classifySpecifier, parseNpmSpecifier, resolveTarget, VetError } from '.
 export type { ResolveOptions, ResolvedTarget, SpecifierKind } from './resolve.ts'
 
 export { RULES, ruleIds, runRules } from './rules/index.ts'
-export type { Rule, RuleContext, FindingInit } from './rule.ts'
+export type { Rule, RuleContext, FindingInit, RuleSubject } from './rule.ts'
 
 export { SCANNER_VERSION, scan, scanDirectory } from './scanner.ts'
 export type { ScanOptions } from './scanner.ts'
@@ -79,6 +79,7 @@ export {
 } from './scan-context.ts'
 export type {
   DependencyMode,
+  FindingIdentityV1,
   ScanContextCheck,
   ScanContextV1,
   ScanCoverageStatus,
@@ -88,6 +89,8 @@ export type {
   ScanProfileV1,
   ScanSubjectV1,
 } from './scan-context.ts'
+
+export { deriveFindingIdentities, deriveObservations, normalizeHost, subjectHash } from './observations.ts'
 
 export { runCli } from './cli.ts'
 export type { CliIo } from './cli.ts'

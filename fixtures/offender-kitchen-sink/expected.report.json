@@ -322,6 +322,134 @@
       "analysisInputDigest": "sha256:b8a30b59595944ba8b14ba94d940e98e1d85c21e8a5aedd3520f7b887d5aefb2",
       "digestKind": "dsh-vet/analysis-input@1"
     },
-    "observations": []
+    "observations": [
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "env"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "fs"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "fs-write"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "net"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "shell"
+      },
+      {
+        "kind": "install-script",
+        "file": "package.json",
+        "subject": "postinstall"
+      },
+      {
+        "kind": "outbound-host",
+        "file": "index.js",
+        "subject": "collect.example.com"
+      }
+    ],
+    "findingIdentities": [
+      {
+        "rule": "dep.floating-range",
+        "variant": "floating",
+        "file": "package.json",
+        "subject": "dsh-searngx"
+      },
+      {
+        "rule": "dep.install-scripts",
+        "variant": "lifecycle",
+        "file": "package.json",
+        "subject": "postinstall"
+      },
+      {
+        "rule": "dep.typosquat-proximity",
+        "variant": "proximity",
+        "file": "package.json",
+        "subject": "dsh-searngx"
+      },
+      {
+        "rule": "egress.outbound-endpoints",
+        "variant": "endpoints",
+        "file": "index.js",
+        "subject": "collect.example.com"
+      },
+      {
+        "rule": "egress.secret-adjacent",
+        "variant": "secret-adjacent",
+        "file": "index.js",
+        "subject": "secret-read-with-reachable-network"
+      },
+      {
+        "rule": "obf.charcode-chain",
+        "variant": "charcode",
+        "file": "index.js",
+        "subject": "sha256:910345a79ad6a97345aa19d38afd3e00e1ec66f1eef6377648b9d976080f3b66"
+      },
+      {
+        "rule": "obf.dynamic-require",
+        "variant": "recoverable",
+        "file": "index.js",
+        "subject": "./dyn-mod.js"
+      },
+      {
+        "rule": "obf.encoded-payload",
+        "variant": "encoded",
+        "file": "index.js",
+        "subject": "base64:sha256:f0da3705b75ee4346f412bc0f13cdd5e61b9f0742ed81dbce628cf843ab05b37"
+      },
+      {
+        "rule": "obf.encoded-payload",
+        "variant": "encoded",
+        "file": "orphan.js",
+        "subject": "hex:sha256:3ae4a73d66b5426374184f57da131aaad020dc229b733a60817435d3d91d51fb"
+      },
+      {
+        "rule": "obf.eval-detect",
+        "variant": "dynamic",
+        "file": "index.js",
+        "subject": "eval"
+      },
+      {
+        "rule": "obf.eval-detect",
+        "variant": "literal",
+        "file": "orphan.js",
+        "subject": "eval:sha256:abc39c508f463d4394aa03901fb318283e0e347f3815767f4ac5ff1046eb4fef"
+      },
+      {
+        "rule": "perm.network-client",
+        "variant": "client",
+        "file": "index.js",
+        "subject": "collect.example.com"
+      },
+      {
+        "rule": "perm.subprocess-spawn",
+        "variant": "spawn",
+        "file": "index.js",
+        "subject": "child_process.exec"
+      },
+      {
+        "rule": "perm.undeclared-fs-write",
+        "variant": "out-of-scope",
+        "file": "index.js",
+        "subject": "/etc/hosts"
+      },
+      {
+        "rule": "perm.unreachable-files",
+        "variant": "unreachable",
+        "file": "orphan.js",
+        "subject": "unreachable"
+      }
+    ]
   }
 }

@@ -140,7 +140,18 @@ describe('scan context and coverage', () => {
     expect(context!.subject.digestKind).toBe('dsh-vet/analysis-input@1')
     expect(context!.subject.analysisInputDigest).toMatch(/^sha256:[0-9a-f]{64}$/)
     expect(context!.subject.archiveDigest).toBeUndefined()
-    expect(context!.observations).toEqual([])
+    expect(context!.observations).toEqual(
+      expect.arrayContaining([
+        { kind: 'capability', file: 'index.js', subject: 'fs' },
+        { kind: 'outbound-host', file: 'index.js', subject: 'api.example.com' },
+      ]),
+    )
+    expect(context!.findingIdentities).toBeDefined()
+    expect(context!.findingIdentities).toEqual(
+      expect.arrayContaining([
+        { rule: 'egress.outbound-endpoints', variant: 'endpoints', file: 'index.js', subject: 'api.example.com' },
+      ]),
+    )
   })
 
   it('derives an identical context across runs and roots with the same content', async () => {

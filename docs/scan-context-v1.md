@@ -43,13 +43,15 @@ a subset scan and tie a report to the bytes it describes.
     "profile":     { /* who analyzed, how configured */ },
     "coverage":    { /* what the analysis reached */ },
     "subject":     { /* what content the report describes */ },
-    "observations": [ /* stable risk observations */ ]
+    "observations": [ /* stable risk observations */ ],
+    "findingIdentities": [ /* stable identities for findings */ ]
   }
 }
 ```
 
 All four areas are required when a version-1 extension is emitted;
-`observations` may be an empty array.
+`observations` may be an empty array. `findingIdentities` is optional
+(vendor rules without identity support omit it).
 
 ## `profile`
 
@@ -135,6 +137,29 @@ emit secret values — prefer safe API names, environment-variable
 identifiers, normalized hosts, and hashes. Unsupported identity cases
 produce a documented limitation, not a guessed match.
 
+## `findingIdentities`
+
+Optional: stable identities for the report's findings, so two reports
+can be compared without diffing human titles or snippets.
+
+| Field | Type | Notes |
+|---|---|---|
+| `rule` | `string` | rule id of the finding this identity describes |
+| `variant` | `string` | rule-defined finding-shape discriminator (single-shape rules use one) |
+| `file` | `string` | package-relative path of the subject |
+| `subject` | `string` | normalized semantic subject: safe API name, host, dependency, or hash |
+| `count` | `integer ≥ 1?` | duplicate identical subjects as counts; default 1 |
+
+Identity is `rule + variant + file + subject`; the array is sorted by
+that quad and unique on it. A rule that aggregates several evidence
+items exposes one identity per subject, so adding a second endpoint is
+detectable even though the finding count does not change. Findings whose
+subjects cannot be normalized safely carry no identity — comparison
+treats them as unsupported, never as matches. The reference scanner
+derives identities from the same analysis facts the rules consumed; a
+rule whose identity derivation disagrees with its emitted findings
+contributes no identities rather than a guessed alignment.
+
 ## Canonical JSON
 
 Both digest computations hash canonical JSON: object keys sorted by
@@ -185,6 +210,9 @@ base report and reported as unsupported context by `checkScanContext()`.
   },
   "observations": [
     { "kind": "outbound-host", "file": "index.js", "subject": "api.example.com", "count": 1 }
+  ],
+  "findingIdentities": [
+    { "rule": "egress.outbound-endpoints", "variant": "endpoints", "file": "index.js", "subject": "api.example.com" }
   ]
 }
 ```

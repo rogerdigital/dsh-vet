@@ -47,6 +47,8 @@ export interface EvalUse {
   line: number
   kind: 'eval' | 'Function'
   literal: boolean
+  /** The statically known argument string, when `literal` is true. */
+  literalValue?: string
   snippet: string
 }
 
@@ -392,6 +394,7 @@ function inspectFile(analysis: Analysis, file: SourceFile, ast: Node): void {
               line,
               kind: 'eval',
               literal: literals.length > 0,
+              ...(literals.length > 0 ? { literalValue: literals[0] } : {}),
               snippet,
             })
           } else if (name === 'Function' && isNew) {
@@ -400,6 +403,7 @@ function inspectFile(analysis: Analysis, file: SourceFile, ast: Node): void {
               line,
               kind: 'Function',
               literal: literals.length > 0,
+              ...(literals.length > 0 ? { literalValue: literals[0] } : {}),
               snippet,
             })
           } else if (name === 'fetch' || name === 'WebSocket') {

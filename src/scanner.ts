@@ -10,10 +10,11 @@ import { resolveTarget } from './resolve.ts'
 import type { ResolvedTarget, ResolveOptions } from './resolve.ts'
 import { createReport } from './contract.ts'
 import type { VetFinding, VetReport } from './contract.ts'
-import { runRules, ruleIds } from './rules/index.ts'
+import { runRules, ruleIds, RULES } from './rules/index.ts'
 import { ANALYSIS_INPUT_DIGEST_KIND, profileDigest } from './scan-context.ts'
 import type { ScanContextV1, ScanOmissionV1 } from './scan-context.ts'
 import { analysisInputDigest } from './identity.ts'
+import { deriveFindingIdentities, deriveObservations } from './observations.ts'
 
 /** Kept in lockstep with package.json; a test asserts they match. */
 export const SCANNER_VERSION = '0.3.0'
@@ -50,7 +51,13 @@ function scanOmissions(analysis: Analysis, resolved?: ResolvedTarget): ScanOmiss
   return omissions.sort((a, b) => compareText(a.path, b.path) || compareText(a.reason, b.reason))
 }
 
-function buildScanContext(analysis: Analysis, options: ScanOptions, resolved?: ResolvedTarget): ScanContextV1 {
+function buildScanContext(
+  analysis: Analysis,
+  options: ScanOptions,
+  findings: readonly VetFinding[],
+  emptyAuditRan: boolean,
+  resolved?: ResolvedTarget,
+): ScanContextV1 {
   const rules = effectiveRuleIds(options)
   const profileFields = {
     analyzerRevision: `dsh-vet-analyzer/${SCANNER_VERSION}`,
@@ -89,7 +96,8 @@ function buildScanContext(analysis: Analysis, options: ScanOptions, resolved?: R
       digestKind: ANALYSIS_INPUT_DIGEST_KIND,
       ...(resolved?.archiveDigest ? { archiveDigest: resolved.archiveDigest } : {}),
     },
-    observations: [],
+    observations: deriveObservations(analysis),
+    findingIdentities: deriveFindingIdentities(analysis, findings, RULES, { emptyAuditRan }),
   }
 }
 
@@ -122,7 +130,8 @@ export interface ScanOptions extends ResolveOptions {
 export async function scanDirectory(dir: string, options: ScanOptions = {}): Promise<VetReport> {
   const analysis = analyze(dir)
   const findings = options.rules ? runRules(analysis, options.rules) : runRules(analysis)
-  if (analysis.files.length === 0) findings.push(emptyAuditFinding(dir))
+  const emptyAuditRan = analysis.files.length === 0
+  if (emptyAuditRan) findings.push(emptyAuditFinding(dir))
   return createReport({
     target: { kind: 'local-path', specifier: dir },
     scanner: {
@@ -131,7 +140,7 @@ export async function scanDirectory(dir: string, options: ScanOptions = {}): Pro
       ranAt: options.now?.() ?? new Date().toISOString(),
     },
     findings,
-    context: buildScanContext(analysis, options),
+    context: buildScanContext(analysis, options, findings, emptyAuditRan),
   })
 }
 
@@ -140,7 +149,8 @@ export async function scan(specifier: string, options: ScanOptions = {}): Promis
   try {
     const analysis = analyze(resolved.rootDir)
     const findings = options.rules ? runRules(analysis, options.rules) : runRules(analysis)
-    if (analysis.files.length === 0) findings.push(emptyAuditFinding(specifier))
+    const emptyAuditRan = analysis.files.length === 0
+    if (emptyAuditRan) findings.push(emptyAuditFinding(specifier))
     return createReport({
       target: resolved.target,
       scanner: {
@@ -149,7 +159,7 @@ export async function scan(specifier: string, options: ScanOptions = {}): Promis
         ranAt: options.now?.() ?? new Date().toISOString(),
       },
       findings,
-      context: buildScanContext(analysis, options, resolved),
+      context: buildScanContext(analysis, options, findings, emptyAuditRan, resolved),
     })
   } finally {
     resolved.cleanup()

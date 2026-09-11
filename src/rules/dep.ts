@@ -13,6 +13,12 @@ export const installScripts: Rule = {
   title: 'Runs code at install time',
   defaultSeverity: 'medium',
   defaultConfidence: 'high',
+  variants: ['lifecycle'],
+  subjects({ analysis }) {
+    const scripts = analysis.pkg?.scripts ?? {}
+    const present = LIFECYCLE_SCRIPTS.filter((name) => typeof scripts[name] === 'string' && scripts[name] !== '')
+    return present.map((name) => ({ variant: 'lifecycle', file: 'package.json', subject: name }))
+  },
   check({ analysis }) {
     const scripts = analysis.pkg?.scripts ?? {}
     const present = LIFECYCLE_SCRIPTS.filter((name) => typeof scripts[name] === 'string' && scripts[name] !== '')
@@ -39,6 +45,12 @@ export const floatingRange: Rule = {
   title: 'Runtime dependencies resolve to whatever the registry serves',
   defaultSeverity: 'medium',
   defaultConfidence: 'high',
+  variants: ['floating'],
+  subjects({ analysis }) {
+    const deps = analysis.pkg?.dependencies ?? {}
+    const floating = Object.entries(deps).filter(([, spec]) => FLOATING.has(spec.trim()))
+    return floating.map(([name]) => ({ variant: 'floating', file: 'package.json', subject: name }))
+  },
   check({ analysis }) {
     const deps = analysis.pkg?.dependencies ?? {}
     const floating = Object.entries(deps).filter(([, spec]) => FLOATING.has(spec.trim()))
@@ -80,6 +92,18 @@ export const typosquatProximity: Rule = {
   title: 'Dependency name is one or two edits from a popular dsh-* package',
   defaultSeverity: 'high',
   defaultConfidence: 'medium',
+  variants: ['proximity'],
+  subjects({ analysis }) {
+    const deps = Object.keys(analysis.pkg?.dependencies ?? {})
+    const hitDeps = new Set<string>()
+    for (const dep of deps) {
+      if (POPULAR_NAMES.includes(dep)) continue
+      for (const popular of POPULAR_NAMES) {
+        if (editDistance(dep, popular, 2) <= 2) hitDeps.add(dep)
+      }
+    }
+    return [...hitDeps].map((dep) => ({ variant: 'proximity', file: 'package.json', subject: dep }))
+  },
   check({ analysis }) {
     const deps = Object.keys(analysis.pkg?.dependencies ?? {})
     const hits: Array<{ dep: string; near: string; distance: number }> = []

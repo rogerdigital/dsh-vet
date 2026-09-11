@@ -5,12 +5,24 @@
 
 import type { Rule } from '../rule.ts'
 import { capEvidence, finding } from '../rule.ts'
+import { subjectHash } from '../observations.ts'
 
 export const evalDetect: Rule = {
   id: 'obf.eval-detect',
   title: 'Evaluates dynamically built code',
   defaultSeverity: 'medium',
   defaultConfidence: 'medium',
+  variants: ['dynamic', 'literal'],
+  subjects({ analysis }) {
+    const out = []
+    for (const use of analysis.evalUses) {
+      if (!use.literal) out.push({ variant: 'dynamic', file: use.file, subject: use.kind })
+      else if (use.literalValue !== undefined) {
+        out.push({ variant: 'literal', file: use.file, subject: `${use.kind}:${subjectHash(use.literalValue)}` })
+      }
+    }
+    return out
+  },
   check({ analysis }) {
     const uses = analysis.evalUses
     if (uses.length === 0) return []
@@ -59,6 +71,18 @@ export const dynamicRequire: Rule = {
   title: 'Loads modules through a computed specifier',
   defaultSeverity: 'medium',
   defaultConfidence: 'low',
+  variants: ['recoverable', 'opaque'],
+  subjects({ analysis }) {
+    const out = []
+    for (const use of analysis.dynamicImports) {
+      if (use.literals !== null && use.literals[0]) {
+        out.push({ variant: 'recoverable', file: use.file, subject: use.literals[0] })
+      } else {
+        out.push({ variant: 'opaque', file: use.file, subject: 'runtime-value' })
+      }
+    }
+    return out
+  },
   check({ analysis }) {
     const recoverable = analysis.dynamicImports.filter((use) => use.literals !== null)
     const opaque = analysis.dynamicImports.filter((use) => use.literals === null)
@@ -103,6 +127,14 @@ export const encodedPayload: Rule = {
   title: 'Long base64/hex string literals in shipped code',
   defaultSeverity: 'medium',
   defaultConfidence: 'low',
+  variants: ['encoded'],
+  subjects({ analysis }) {
+    return analysis.encodedLiterals.map((lit) => ({
+      variant: 'encoded',
+      file: lit.file,
+      subject: `${lit.charset}:${subjectHash(lit.value)}`,
+    }))
+  },
   check({ analysis }) {
     const literals = analysis.encodedLiterals
     if (literals.length === 0) return []
@@ -128,6 +160,15 @@ export const charcodeChain: Rule = {
   title: 'Builds strings from character codes',
   defaultSeverity: 'medium',
   defaultConfidence: 'medium',
+  variants: ['charcode'],
+  subjects({ analysis }) {
+    // The decoded text may embed payloads; identify it by hash, not value.
+    return analysis.charcodeCalls.map((call) => ({
+      variant: 'charcode',
+      file: call.file,
+      subject: subjectHash(call.chars),
+    }))
+  },
   check({ analysis }) {
     const calls = analysis.charcodeCalls
     if (calls.length === 0) return []
@@ -150,6 +191,12 @@ export const unparseable: Rule = {
   title: 'Shipped JS files that no standard parser accepts',
   defaultSeverity: 'medium',
   defaultConfidence: 'high',
+  variants: ['unparseable'],
+  subjects({ analysis }) {
+    return analysis.files
+      .filter((f) => f.parseError !== null)
+      .map((f) => ({ variant: 'unparseable', file: f.path, subject: 'unparseable' }))
+  },
   check({ analysis }) {
     const broken = analysis.files.filter((f) => f.parseError !== null)
     if (broken.length === 0) return []

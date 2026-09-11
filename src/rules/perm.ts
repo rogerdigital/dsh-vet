@@ -11,6 +11,7 @@
 import { homedir, tmpdir } from 'node:os'
 import type { Rule } from '../rule.ts'
 import { capEvidence, declaresSeam, finding, usesOfCap } from '../rule.ts'
+import { normalizeHost } from '../observations.ts'
 
 const SEAM_FOR_CAP: Record<string, string> = {
   fs: 'fs',
@@ -25,6 +26,19 @@ export const seamMismatch: Rule = {
   title: 'Capability used but not declared in dsh.seams',
   defaultSeverity: 'medium',
   defaultConfidence: 'medium',
+  variants: ['mismatch'],
+  subjects({ analysis }) {
+    const declared = analysis.pkg?.seams
+    if (!declared) return []
+    const lower = new Set(declared.map((s) => s.toLowerCase()))
+    const out = []
+    for (const [cap, seam] of Object.entries(SEAM_FOR_CAP)) {
+      if (lower.has(seam)) continue
+      const use = usesOfCap(analysis, cap)[0]
+      if (use) out.push({ variant: 'mismatch', file: use.file, subject: cap })
+    }
+    return out
+  },
   check({ analysis }) {
     const declared = analysis.pkg?.seams
     if (!declared) return []
@@ -69,6 +83,17 @@ export const undeclaredFsWrite: Rule = {
   title: 'Writes or deletes files outside any plausible plugin scope',
   defaultSeverity: 'high',
   defaultConfidence: 'medium',
+  variants: ['out-of-scope', 'dynamic'],
+  subjects({ analysis }) {
+    const uses = usesOfCap(analysis, 'fs-write')
+    const out = []
+    for (const use of uses) {
+      const outOfScope = use.literals.find((l) => l.startsWith('/') && !inScopeLiteral(l))
+      if (outOfScope) out.push({ variant: 'out-of-scope', file: use.file, subject: outOfScope })
+      else if (use.literals.length === 0) out.push({ variant: 'dynamic', file: use.file, subject: 'runtime-value' })
+    }
+    return out
+  },
   check({ analysis }) {
     const uses = usesOfCap(analysis, 'fs-write')
     if (uses.length === 0) return []
@@ -131,6 +156,16 @@ export const subprocessSpawn: Rule = {
   title: 'Spawns subprocesses',
   defaultSeverity: 'medium',
   defaultConfidence: 'high',
+  variants: ['spawn', 'import-only'],
+  subjects({ analysis }) {
+    const uses = usesOfCap(analysis, 'shell')
+    const out = uses.map((use) => ({ variant: 'spawn', file: use.file, subject: use.api }))
+    const importOnly = analysis.files.filter(
+      (f) => f.externals.some((e) => /^(?:node:)?child_process$/.test(e)) && !uses.some((u) => u.file === f.path),
+    )
+    for (const file of importOnly) out.push({ variant: 'import-only', file: file.path, subject: 'child_process' })
+    return out
+  },
   check({ analysis }) {
     const declared = declaresSeam(analysis, 'shell')
     const uses = usesOfCap(analysis, 'shell')
@@ -181,6 +216,22 @@ export const networkClient: Rule = {
   title: 'Opens network connections',
   defaultSeverity: 'medium',
   defaultConfidence: 'high',
+  variants: ['client', 'import-only'],
+  subjects({ analysis }) {
+    const out = []
+    for (const use of analysis.netUses) {
+      const host = use.literals.length > 0 ? normalizeHost(use.literals[0]!) : null
+      out.push({ variant: 'client', file: use.file, subject: host ?? 'runtime-target' })
+    }
+    const importOnly = analysis.files.filter(
+      (f) => f.externals.some((e) => NET_IMPORT_RE.test(e)) && !analysis.netUses.some((u) => u.file === f.path),
+    )
+    for (const file of importOnly) {
+      const module = file.externals.find((e) => NET_IMPORT_RE.test(e))!
+      out.push({ variant: 'import-only', file: file.path, subject: module })
+    }
+    return out
+  },
   check({ analysis }) {
     const declared = declaresSeam(analysis, 'web')
     const findings = []
@@ -230,6 +281,10 @@ export const unreachableFiles: Rule = {
   title: 'Shipped files not reachable from any declared entry point',
   defaultSeverity: 'info',
   defaultConfidence: 'high',
+  variants: ['unreachable'],
+  subjects({ analysis }) {
+    return analysis.unreachable.map((path) => ({ variant: 'unreachable', file: path, subject: 'unreachable' }))
+  },
   check({ analysis }) {
     if (analysis.unreachable.length === 0) return []
     return [

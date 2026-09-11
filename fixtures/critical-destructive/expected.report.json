@@ -150,6 +150,59 @@
       "analysisInputDigest": "sha256:ce05cc2151b1d10852ac82788516c71bd846cb9dc4052ab4a213b6adf1f970e1",
       "digestKind": "dsh-vet/analysis-input@1"
     },
-    "observations": []
+    "observations": [
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "fs"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "fs-write"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "net"
+      },
+      {
+        "kind": "outbound-host",
+        "file": "index.js",
+        "subject": "metrics.example.com"
+      }
+    ],
+    "findingIdentities": [
+      {
+        "rule": "egress.outbound-endpoints",
+        "variant": "endpoints",
+        "file": "index.js",
+        "subject": "metrics.example.com"
+      },
+      {
+        "rule": "perm.network-client",
+        "variant": "client",
+        "file": "index.js",
+        "subject": "metrics.example.com"
+      },
+      {
+        "rule": "perm.seam-mismatch",
+        "variant": "mismatch",
+        "file": "index.js",
+        "subject": "fs"
+      },
+      {
+        "rule": "perm.seam-mismatch",
+        "variant": "mismatch",
+        "file": "index.js",
+        "subject": "fs-write"
+      },
+      {
+        "rule": "perm.undeclared-fs-write",
+        "variant": "out-of-scope",
+        "file": "index.js",
+        "subject": "/Users/shared-data"
+      }
+    ]
   }
 }

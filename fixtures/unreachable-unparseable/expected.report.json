@@ -128,6 +128,32 @@
       "analysisInputDigest": "sha256:aebfa271e1da9e215599efbc56c13bacaf8cd0388c0c40f6759dacb708861a40",
       "digestKind": "dsh-vet/analysis-input@1"
     },
-    "observations": []
+    "observations": [],
+    "findingIdentities": [
+      {
+        "rule": "obf.eval-detect",
+        "variant": "literal",
+        "file": "orphan.js",
+        "subject": "eval:sha256:4a1b21d876ae00c8ed5c4d1cde09c61f8a61b50fe370a801b10c339831f370ab"
+      },
+      {
+        "rule": "obf.unparseable",
+        "variant": "unparseable",
+        "file": "broken.js",
+        "subject": "unparseable"
+      },
+      {
+        "rule": "perm.unreachable-files",
+        "variant": "unreachable",
+        "file": "broken.js",
+        "subject": "unreachable"
+      },
+      {
+        "rule": "perm.unreachable-files",
+        "variant": "unreachable",
+        "file": "orphan.js",
+        "subject": "unreachable"
+      }
+    ]
   }
 }
