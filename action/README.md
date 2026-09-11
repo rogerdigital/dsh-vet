@@ -90,13 +90,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
-      - run: npx -y dsh-vet@0.3.0 --json . > "$RUNNER_TEMP/base.report.json"
+      - run: npx -y dsh-vet@0.4.0 --json . > "$RUNNER_TEMP/base.report.json"
 
       # 2. Back to the PR head, then audit with the baseline attached.
       - uses: actions/checkout@v4
         with:
           clean: true
-      - uses: rogerdigital/dsh-vet/action@v0.3.0
+      - uses: rogerdigital/dsh-vet/action@v0.4.0
         with:
           specifier: '.'
           baseline-report: ${{ runner.temp }}/base.report.json

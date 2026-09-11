@@ -17,7 +17,7 @@ import { analysisInputDigest } from './identity.ts'
 import { deriveFindingIdentities, deriveObservations } from './observations.ts'
 
 /** Kept in lockstep with package.json; a test asserts they match. */
-export const SCANNER_VERSION = '0.3.0'
+export const SCANNER_VERSION = '0.4.0'
 
 /**
  * Fixed limitations of the reference scanner's scope, reported even on
