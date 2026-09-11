@@ -172,13 +172,18 @@ artifact matching, and calibration follow through separate milestone
 gates. This work does not replace the v0.3 adoption and contract-freeze
 criteria above.
 
-**Status — M0/M1 implemented; pilot internal only.** Scan context
+**Status — M0/M1 implemented and shipped in [0.4.0](https://github.com/rogerdigital/dsh-vet/releases/tag/v0.4.0); pilot internal, external feedback round live.** Scan context
 (`x-dsh-vet` v1), content identity, stable observations and finding
 identities, `dsh-vet diff` (`dsh-vet/diff/v1`), coverage-qualified
 output, and the optional Action `baseline-report` comparison are
-implemented and tested. The [pilot record](docs/release-risk-pilot.md)
-covers two real release pairs reconciled against code evidence.
-**External maintainer feedback is pending — this is not adoption, and
+implemented, tested, and published. The [pilot record](docs/release-risk-pilot.md)
+covers two real release pairs reconciled against code evidence; the
+external ask went to three plugin authors on 2026-09-11
+([dsh-doctor](https://github.com/astra3294/dsh-doctor/issues/9),
+[dsh-wechat](https://github.com/pan17/dsh-wechat/issues/7),
+[dsh-find-plugin](https://github.com/awesome-dsh-plugin/dsh-find-plugin/issues/11))
+plus the [#1115 follow-up](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18402967).
+**No maintainer has replied yet — this is not adoption, and
 the M2 entry gate (repeated pilot use showing review friction) is not
 met.** The plan's later milestones keep their entry gates.
 

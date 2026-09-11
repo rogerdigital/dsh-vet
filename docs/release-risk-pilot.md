@@ -89,7 +89,12 @@ Intake questions (mirroring the plan's §10 usefulness criteria):
 
 | Date | Plugin | Thread | Verdict (used / not / second release) |
 |---|---|---|---|
-| — | — | — | — |
+| 2026-09-11 | dsh-doctor | [astra3294/dsh-doctor#9](https://github.com/astra3294/dsh-doctor/issues/9) | pending |
+| 2026-09-11 | dsh-wechat | [pan17/dsh-wechat#7](https://github.com/pan17/dsh-wechat/issues/7) | pending |
+| 2026-09-11 | dsh-find-plugin | [awesome-dsh-plugin/dsh-find-plugin#11](https://github.com/awesome-dsh-plugin/dsh-find-plugin/issues/11) | pending |
+
+The announcement follow-up went out after 0.4.0 shipped:
+[deepseek-harness#1115](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18402967).
 
 ## Reproduction
 
