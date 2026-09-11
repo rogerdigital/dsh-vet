@@ -14,6 +14,14 @@ import type { DiffSide, VetDiff } from './compare.ts'
 
 const LIMIT = 10
 
+/**
+ * Stated on every diff output, per pilot feedback: what the comparison
+ * covers is package-level static behavior — composed-profile and
+ * host-version behavior is invisible from the package alone.
+ */
+const SCOPE_NOTE =
+  'scope: package-level static behavior only — behavior that depends on the composed DSH profile or host version is not visible from the package alone.'
+
 /** Strip control characters — report-derived text goes to a terminal. */
 function sanitize(text: string): string {
   return text.replace(/[\u0000-\u001f\u007f]/g, '')
@@ -40,6 +48,7 @@ function renderDiffText(diff: VetDiff): string {
 
   if (diff.comparability === 'incomparable') {
     lines.push('comparison unavailable — when practical, rescan both artifacts with the same scanner and profile.')
+    lines.push(SCOPE_NOTE)
     return lines.join('\n')
   }
 
@@ -102,6 +111,7 @@ function renderDiffText(diff: VetDiff): string {
     `summary: ${diff.findings.added.length} added · ${diff.findings.removed.length} removed · ${diff.findings.changed.length} changed · ${diff.findings.unchanged.length} unchanged`,
   )
   lines.push(`grade: ${diff.base.grade} → ${diff.head.grade} (secondary context)`)
+  lines.push(SCOPE_NOTE)
   return lines.join('\n')
 }
 

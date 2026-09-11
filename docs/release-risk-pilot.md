@@ -109,8 +109,8 @@ dsh-wechat reply takeaways (2026-09-11):
   static behavior only — behavior depending on the composed DSH profile
   or host version (runtime service contracts, registered
   tools/commands, `ctx.inject`) is not visible from the package alone.
-  Action item: state this on every diff output and PR comparison
-  section, not only in coverage limitations.
+  Addressed: every `dsh-vet diff` output and PR comparison section now
+  states the scope explicitly.
 
 The announcement follow-up went out after 0.4.0 shipped:
 [deepseek-harness#1115](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18402967).
