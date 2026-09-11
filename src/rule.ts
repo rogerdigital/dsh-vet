@@ -20,6 +20,29 @@ export interface Rule {
   defaultSeverity: VetSeverity
   defaultConfidence: VetConfidence
   check(ctx: RuleContext): VetFinding[]
+  /**
+   * Finding-shape discriminators in the order `check` appends them, when the
+   * rule emits more than one shape (e.g. `dynamic` vs `literal` eval).
+   * `subjects` entries carry the same names so identities stay alignable.
+   */
+  variants?: readonly string[]
+  /**
+   * Stable identities for the findings this rule emits from this analysis —
+   * computed from the same predicates `check` uses, so a subject exists
+   * exactly when the corresponding finding does. Subjects never carry secret
+   * values, display titles, severities, or line numbers.
+   */
+  subjects?(ctx: RuleContext): RuleSubject[]
+}
+
+/** One stable identity unit: rule variant + relative file + semantic subject. */
+export interface RuleSubject {
+  /** Matches an entry of `Rule.variants`; single-shape rules use one name. */
+  variant: string
+  /** Package-relative path the subject lives in, e.g. `index.js`. */
+  file: string
+  /** Normalized semantic subject: safe API name, host, dependency, or hash. */
+  subject: string
 }
 
 export interface FindingInit {

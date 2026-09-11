@@ -108,6 +108,36 @@
       "analysisInputDigest": "sha256:a0ed3156ffc52e5140fe95570d03cc05df3909bcb922445c1a25d05aee1adf40",
       "digestKind": "dsh-vet/analysis-input@1"
     },
-    "observations": []
+    "observations": [
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "fs"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "net"
+      },
+      {
+        "kind": "outbound-host",
+        "file": "index.js",
+        "subject": "api.example.com"
+      }
+    ],
+    "findingIdentities": [
+      {
+        "rule": "egress.outbound-endpoints",
+        "variant": "endpoints",
+        "file": "index.js",
+        "subject": "api.example.com"
+      },
+      {
+        "rule": "perm.network-client",
+        "variant": "client",
+        "file": "index.js",
+        "subject": "api.example.com"
+      }
+    ]
   }
 }

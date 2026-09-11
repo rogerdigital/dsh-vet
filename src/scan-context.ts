@@ -102,12 +102,28 @@ export interface ScanObservationV1 {
   readonly count?: number
 }
 
+/** Stable identity for a finding: rule + variant + file + semantic subject. */
+export interface FindingIdentityV1 {
+  /** Rule id of the finding this identity describes. */
+  readonly rule: string
+  /** Rule-defined finding-shape discriminator (single-shape rules use one). */
+  readonly variant: string
+  /** Package-relative path of the subject. */
+  readonly file: string
+  /** Normalized semantic subject: safe API name, host, dependency, or hash. */
+  readonly subject: string
+  /** Duplicate identical subjects as counts; default 1. */
+  readonly count?: number
+}
+
 export interface ScanContextV1 {
   readonly version: typeof SCAN_CONTEXT_VERSION
   readonly profile: ScanProfileV1
   readonly coverage: ScanCoverageV1
   readonly subject: ScanSubjectV1
   readonly observations: readonly ScanObservationV1[]
+  /** Stable identities for the report's findings; optional for vendors. */
+  readonly findingIdentities?: readonly FindingIdentityV1[]
 }
 
 /**
@@ -371,6 +387,52 @@ function validateContextV1(context: Record<string, unknown>, at: string): Valida
         if (compare(prev, cur) > 0) {
           fail(`${at}.observations`, 'must be sorted by kind, then file, then subject')
           break
+        }
+      }
+    }
+  }
+
+  if (context.findingIdentities !== undefined) {
+    if (!Array.isArray(context.findingIdentities)) {
+      fail(`${at}.findingIdentities`, `must be an array, got ${show(context.findingIdentities)}`)
+    } else {
+      const identities = context.findingIdentities
+      let shapeOk = true
+      identities.forEach((raw, i) => {
+        const idAt = `${at}.findingIdentities[${i}]`
+        if (!isObject(raw)) {
+          fail(idAt, `must be an object, got ${show(raw)}`)
+          shapeOk = false
+          return
+        }
+        for (const key of ['rule', 'variant', 'file', 'subject'] as const) {
+          if (typeof raw[key] !== 'string' || raw[key] === '') {
+            fail(`${idAt}.${key}`, `must be a non-empty string, got ${show(raw[key])}`)
+            shapeOk = false
+          }
+        }
+        if (shapeOk && typeof raw.rule === 'string' && !RULE_ID_PATTERN.test(raw.rule)) {
+          fail(`${idAt}.rule`, `must be a valid rule id, got ${show(raw.rule)} (vendor rule sets prefix their own segment, e.g. acme.eval-detect)`)
+        }
+        if (raw.count !== undefined && (!isInt(raw.count) || raw.count < 1)) {
+          fail(`${idAt}.count`, `must be an integer >= 1 when present, got ${show(raw.count)}`)
+          shapeOk = false
+        }
+      })
+      if (shapeOk) {
+        const quad = (o: Record<string, unknown>): string =>
+          `${o.rule as string}\0${o.variant as string}\0${o.file as string}\0${o.subject as string}`
+        for (let i = 1; i < identities.length; i++) {
+          const prev = quad(identities[i - 1] as Record<string, unknown>)
+          const cur = quad(identities[i] as Record<string, unknown>)
+          if (prev === cur) {
+            fail(`${at}.findingIdentities`, `duplicate identity ${show(cur.replace(/\0/g, ' | '))} — duplicates are represented as counts, not repeated entries`)
+            break
+          }
+          if (compare(prev, cur) > 0) {
+            fail(`${at}.findingIdentities`, 'must be sorted by rule, then variant, then file, then subject')
+            break
+          }
         }
       }
     }
