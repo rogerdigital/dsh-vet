@@ -364,91 +364,106 @@
         "rule": "dep.floating-range",
         "variant": "floating",
         "file": "package.json",
-        "subject": "dsh-searngx"
+        "subject": "dsh-searngx",
+        "finding": 2
       },
       {
         "rule": "dep.install-scripts",
         "variant": "lifecycle",
         "file": "package.json",
-        "subject": "postinstall"
+        "subject": "postinstall",
+        "finding": 3
       },
       {
         "rule": "dep.typosquat-proximity",
         "variant": "proximity",
         "file": "package.json",
-        "subject": "dsh-searngx"
+        "subject": "dsh-searngx",
+        "finding": 10
       },
       {
         "rule": "egress.outbound-endpoints",
         "variant": "endpoints",
         "file": "index.js",
-        "subject": "collect.example.com"
+        "subject": "collect.example.com",
+        "finding": 11
       },
       {
         "rule": "egress.secret-adjacent",
         "variant": "secret-adjacent",
         "file": "index.js",
-        "subject": "secret-read-with-reachable-network"
+        "subject": "secret-read-with-reachable-network",
+        "finding": 0
       },
       {
         "rule": "obf.charcode-chain",
         "variant": "charcode",
         "file": "index.js",
-        "subject": "sha256:910345a79ad6a97345aa19d38afd3e00e1ec66f1eef6377648b9d976080f3b66"
+        "subject": "sha256:910345a79ad6a97345aa19d38afd3e00e1ec66f1eef6377648b9d976080f3b66",
+        "finding": 4
       },
       {
         "rule": "obf.dynamic-require",
         "variant": "recoverable",
         "file": "index.js",
-        "subject": "./dyn-mod.js"
+        "subject": "./dyn-mod.js",
+        "finding": 5
       },
       {
         "rule": "obf.encoded-payload",
         "variant": "encoded",
         "file": "index.js",
-        "subject": "base64:sha256:f0da3705b75ee4346f412bc0f13cdd5e61b9f0742ed81dbce628cf843ab05b37"
+        "subject": "base64:sha256:f0da3705b75ee4346f412bc0f13cdd5e61b9f0742ed81dbce628cf843ab05b37",
+        "finding": 6
       },
       {
         "rule": "obf.encoded-payload",
         "variant": "encoded",
         "file": "orphan.js",
-        "subject": "hex:sha256:3ae4a73d66b5426374184f57da131aaad020dc229b733a60817435d3d91d51fb"
+        "subject": "hex:sha256:3ae4a73d66b5426374184f57da131aaad020dc229b733a60817435d3d91d51fb",
+        "finding": 6
       },
       {
         "rule": "obf.eval-detect",
         "variant": "dynamic",
         "file": "index.js",
-        "subject": "eval"
+        "subject": "eval",
+        "finding": 7
       },
       {
         "rule": "obf.eval-detect",
         "variant": "literal",
         "file": "orphan.js",
-        "subject": "eval:sha256:abc39c508f463d4394aa03901fb318283e0e347f3815767f4ac5ff1046eb4fef"
+        "subject": "eval:sha256:abc39c508f463d4394aa03901fb318283e0e347f3815767f4ac5ff1046eb4fef",
+        "finding": 12
       },
       {
         "rule": "perm.network-client",
         "variant": "client",
         "file": "index.js",
-        "subject": "collect.example.com"
+        "subject": "collect.example.com",
+        "finding": 8
       },
       {
         "rule": "perm.subprocess-spawn",
         "variant": "spawn",
         "file": "index.js",
-        "subject": "child_process.exec"
+        "subject": "child_process.exec",
+        "finding": 9
       },
       {
         "rule": "perm.undeclared-fs-write",
         "variant": "out-of-scope",
         "file": "index.js",
-        "subject": "/etc/hosts"
+        "subject": "/etc/hosts",
+        "finding": 1
       },
       {
         "rule": "perm.unreachable-files",
         "variant": "unreachable",
         "file": "orphan.js",
-        "subject": "unreachable"
+        "subject": "unreachable",
+        "finding": 13
       }
     ]
   }

@@ -130,13 +130,15 @@
         "rule": "egress.outbound-endpoints",
         "variant": "endpoints",
         "file": "index.js",
-        "subject": "api.example.com"
+        "subject": "api.example.com",
+        "finding": 0
       },
       {
         "rule": "perm.network-client",
         "variant": "client",
         "file": "index.js",
-        "subject": "api.example.com"
+        "subject": "api.example.com",
+        "finding": 1
       }
     ]
   }

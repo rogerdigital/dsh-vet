@@ -149,9 +149,17 @@ describe('scan context and coverage', () => {
     expect(context!.findingIdentities).toBeDefined()
     expect(context!.findingIdentities).toEqual(
       expect.arrayContaining([
-        { rule: 'egress.outbound-endpoints', variant: 'endpoints', file: 'index.js', subject: 'api.example.com' },
+        expect.objectContaining({
+          rule: 'egress.outbound-endpoints',
+          variant: 'endpoints',
+          file: 'index.js',
+          subject: 'api.example.com',
+        }),
       ]),
     )
+    for (const identity of context!.findingIdentities!) {
+      expect(report.findings[identity.finding]!.id).toBe(identity.rule)
+    }
   })
 
   it('derives an identical context across runs and roots with the same content', async () => {

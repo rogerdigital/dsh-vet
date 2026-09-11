@@ -112,6 +112,8 @@ export interface FindingIdentityV1 {
   readonly file: string
   /** Normalized semantic subject: safe API name, host, dependency, or hash. */
   readonly subject: string
+  /** Index into `findings` this identity describes; cross-checked on validation. */
+  readonly finding: number
   /** Duplicate identical subjects as counts; default 1. */
   readonly count?: number
 }
@@ -220,12 +222,16 @@ export function checkScanContext(report: unknown): ScanContextCheck {
   if (version !== SCAN_CONTEXT_VERSION) {
     return { state: 'unsupported', version }
   }
-  const issues = validateContextV1(value, at)
+  const issues = validateContextV1(value, at, report.findings)
   if (issues.length > 0) return { state: 'invalid', issues }
   return { state: 'validated', context: value as unknown as ScanContextV1 }
 }
 
-function validateContextV1(context: Record<string, unknown>, at: string): ValidationIssue[] {
+function validateContextV1(
+  context: Record<string, unknown>,
+  at: string,
+  findings: unknown,
+): ValidationIssue[] {
   const issues: ValidationIssue[] = []
   const fail = (path: string, message: string): void => {
     issues.push({ path, message })
@@ -413,6 +419,15 @@ function validateContextV1(context: Record<string, unknown>, at: string): Valida
         }
         if (shapeOk && typeof raw.rule === 'string' && !RULE_ID_PATTERN.test(raw.rule)) {
           fail(`${idAt}.rule`, `must be a valid rule id, got ${show(raw.rule)} (vendor rule sets prefix their own segment, e.g. acme.eval-detect)`)
+        }
+        if (!isInt(raw.finding) || raw.finding < 0) {
+          fail(`${idAt}.finding`, `must be a non-negative integer index into findings, got ${show(raw.finding)}`)
+          shapeOk = false
+        } else if (Array.isArray(findings)) {
+          const finding = findings[raw.finding] as { id?: unknown } | undefined
+          if (!finding || finding.id !== raw.rule) {
+            fail(`${idAt}.finding`, `must index a finding whose id is ${show(raw.rule)}, got ${show(finding?.id ?? 'out of range')}`)
+          }
         }
         if (raw.count !== undefined && (!isInt(raw.count) || raw.count < 1)) {
           fail(`${idAt}.count`, `must be an integer >= 1 when present, got ${show(raw.count)}`)
