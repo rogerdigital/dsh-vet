@@ -58,6 +58,7 @@ describe('resolveTarget', () => {
       expect(resolved.target.kind).toBe('local-path')
       expect(resolved.rootDir).toBe(dir)
       expect(readFileSync(join(resolved.rootDir, 'package.json'), 'utf8')).toContain('local-demo')
+      expect(resolved.archiveDigest).toBeUndefined()
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
@@ -94,6 +95,7 @@ describe('resolveTarget', () => {
       })
       expect(resolved.files).toEqual(['index.js', 'package.json'])
       expect(readFileSync(join(resolved.rootDir, 'index.js'), 'utf8')).toBe('export const x = 1')
+      expect(resolved.archiveDigest).toBe(`sha256:${createHash('sha256').update(tarball).digest('hex')}`)
     } finally {
       resolved.cleanup()
     }

@@ -11,6 +11,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { parse } from 'acorn'
 import type { Node } from 'acorn'
+import type { AnalysisInput } from './identity.ts'
 
 export type Capability =
   | 'fs'
@@ -115,6 +116,12 @@ export interface Analysis {
   dynamicImports: DynamicImportUse[]
   encodedLiterals: EncodedLiteral[]
   charcodeCalls: CharcodeCall[]
+  /** Captured input snapshots (JS files + package.json) for content identity. */
+  inputs: AnalysisInput[]
+  /** Known omissions observed during candidate discovery, e.g. symlinks. */
+  omissions: Array<{ reason: string; path: string }>
+  /** Declared entry hints that resolved to no file at all. */
+  unresolvedEntries: string[]
 }
 
 // ---------------------------------------------------------------------------
@@ -182,12 +189,18 @@ function snippetAt(code: string, line: number): string {
   return text.trim().slice(0, 120)
 }
 
-function listJsFiles(rootDir: string): string[] {
+function listJsFiles(rootDir: string): { paths: string[]; omissions: Array<{ reason: string; path: string }> } {
   const out: string[] = []
+  const omissions: Array<{ reason: string; path: string }> = []
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       if (entry.name === 'node_modules' || entry.name === '.git' || entry.name.startsWith('.DS')) continue
       const abs = join(dir, entry.name)
+      if (entry.isSymbolicLink()) {
+        // Never follow links: a link out of the target is not its content.
+        omissions.push({ reason: 'symlink', path: toPosix(relative(rootDir, abs)) })
+        continue
+      }
       if (entry.isDirectory()) walk(abs)
       else if (/\.(?:js|mjs|cjs)$/.test(entry.name)) out.push(abs)
       else if (!entry.name.includes('.')) {
@@ -198,7 +211,10 @@ function listJsFiles(rootDir: string): string[] {
     }
   }
   walk(rootDir)
-  return out.sort()
+  return {
+    paths: out.sort(),
+    omissions: omissions.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0)),
+  }
 }
 
 function parseSource(path: string, code: string): Pick<SourceFile, 'ast' | 'sourceType' | 'parseError'> {
@@ -572,20 +588,28 @@ function entryHints(pkg: PkgJson): string[] {
   return [...hints]
 }
 
-function readPkg(rootDir: string): PkgJson | null {
+function readPkgBytes(rootDir: string): Buffer | null {
   try {
-    const raw = JSON.parse(readFileSync(join(rootDir, 'package.json'), 'utf8')) as Record<string, unknown>
+    return readFileSync(join(rootDir, 'package.json'))
+  } catch {
+    return null
+  }
+}
+
+function parsePkgJson(raw: string): PkgJson | null {
+  try {
+    const rawRecord = JSON.parse(raw) as Record<string, unknown>
     const asRecord = (value: unknown): Record<string, string> =>
       value && typeof value === 'object' ? (value as Record<string, string>) : {}
-    const dsh = raw['dsh'] as Record<string, unknown> | undefined
+    const dsh = rawRecord['dsh'] as Record<string, unknown> | undefined
     const seams = Array.isArray(dsh?.['seams']) ? (dsh!['seams'] as string[]) : null
     const pkg: PkgJson = {
-      raw,
-      name: typeof raw['name'] === 'string' ? raw['name'] : '',
-      version: typeof raw['version'] === 'string' ? raw['version'] : '',
-      scripts: asRecord(raw['scripts']),
-      dependencies: asRecord(raw['dependencies']),
-      devDependencies: asRecord(raw['devDependencies']),
+      raw: rawRecord,
+      name: typeof rawRecord['name'] === 'string' ? rawRecord['name'] : '',
+      version: typeof rawRecord['version'] === 'string' ? rawRecord['version'] : '',
+      scripts: asRecord(rawRecord['scripts']),
+      dependencies: asRecord(rawRecord['dependencies']),
+      devDependencies: asRecord(rawRecord['devDependencies']),
       seams,
       entryHints: [],
     }
@@ -601,7 +625,11 @@ const byFileLine = (a: { file: string; line: number }, b: { file: string; line: 
 
 /** Analyze a package directory: parse, walk, and build the module graph. */
 export function analyze(rootDir: string): Analysis {
-  const pkg = readPkg(rootDir)
+  const pkgBytes = readPkgBytes(rootDir)
+  const pkg = pkgBytes === null ? null : parsePkgJson(pkgBytes.toString('utf8'))
+  const { paths: jsPaths, omissions } = listJsFiles(rootDir)
+  const inputs: AnalysisInput[] = []
+  if (pkgBytes !== null) inputs.push({ path: 'package.json', bytes: pkgBytes })
   const analysis: Analysis = {
     rootDir,
     pkg,
@@ -617,11 +645,17 @@ export function analyze(rootDir: string): Analysis {
     dynamicImports: [],
     encodedLiterals: [],
     charcodeCalls: [],
+    inputs,
+    omissions,
+    unresolvedEntries: [],
   }
 
-  for (const abs of listJsFiles(rootDir)) {
+  for (const abs of jsPaths) {
     const path = toPosix(relative(rootDir, abs))
-    const code = readFileSync(abs, 'utf8')
+    // Read bytes once; the same snapshot feeds analysis and content identity.
+    const bytes = readFileSync(abs)
+    const code = bytes.toString('utf8')
+    inputs.push({ path, bytes })
     const parsed = parseSource(path, code)
     const file: SourceFile = {
       path,
@@ -646,9 +680,17 @@ export function analyze(rootDir: string): Analysis {
   // sits at the top level still gets excluded from `unreachable` noise below
   // only when reachable from an entry.
   const entries = new Set<string>()
+  const unresolvedEntries: string[] = []
   for (const hint of pkg?.entryHints ?? ['index.js']) {
     const rel = resolveRelative(rootDir, 'package.json', hint)
-    if (rel && analysis.fileByPath.has(rel)) entries.add(rel)
+    if (rel === null) {
+      // The declared entry resolves to no file at all — the honest miss.
+      // A hint that resolves to a non-JS file (e.g. `./package.json`) is
+      // simply not a graph root, not an unresolved entry.
+      unresolvedEntries.push(hint)
+    } else if (analysis.fileByPath.has(rel)) {
+      entries.add(rel)
+    }
   }
   const queue = [...entries].sort()
   const edges = new Map<string, string[]>()
@@ -672,6 +714,7 @@ export function analyze(rootDir: string): Analysis {
   analysis.edges = edges
   analysis.entries = [...entries].sort()
   analysis.unreachable = analysis.files.map((f) => f.path).filter((p) => !analysis.reachable.has(p))
+  analysis.unresolvedEntries = [...new Set(unresolvedEntries)].sort()
 
   analysis.capUses.sort((a, b) => byFileLine(a, b) || a.api.localeCompare(b.api) || a.cap.localeCompare(b.cap))
   analysis.netUses.sort(byFileLine)

@@ -74,5 +74,60 @@
         "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.unreachable-files.md"
       ]
     }
-  ]
+  ],
+  "x-dsh-vet": {
+    "version": 1,
+    "profile": {
+      "analyzerRevision": "dsh-vet-analyzer/0.3.0",
+      "ruleCatalogRevision": "dsh-vet-rules/0.3.0",
+      "rules": [
+        "dep.floating-range",
+        "dep.install-scripts",
+        "dep.typosquat-proximity",
+        "egress.outbound-endpoints",
+        "egress.secret-adjacent",
+        "obf.charcode-chain",
+        "obf.dynamic-require",
+        "obf.encoded-payload",
+        "obf.eval-detect",
+        "obf.unparseable",
+        "perm.network-client",
+        "perm.seam-mismatch",
+        "perm.subprocess-spawn",
+        "perm.undeclared-fs-write",
+        "perm.unreachable-files",
+        "scan.empty-audit"
+      ],
+      "options": {},
+      "digest": "sha256:bdb1319356361dcc82c030b26bf6fe602cf303b92fc095b75f71391862542ed2"
+    },
+    "coverage": {
+      "status": "partial",
+      "candidateJs": 3,
+      "parsed": 2,
+      "parseFailures": 1,
+      "failedFiles": [
+        "broken.js"
+      ],
+      "entries": {
+        "resolved": [
+          "index.js"
+        ],
+        "unresolved": []
+      },
+      "omissions": [],
+      "dependencyMode": "not-scanned",
+      "limitations": [
+        "dependencies are not scanned",
+        "non-JavaScript files and executables are not analyzed",
+        "static analysis cannot observe runtime-computed behavior"
+      ]
+    },
+    "subject": {
+      "packageName": "dsh-orphans-demo",
+      "analysisInputDigest": "sha256:aebfa271e1da9e215599efbc56c13bacaf8cd0388c0c40f6759dacb708861a40",
+      "digestKind": "dsh-vet/analysis-input@1"
+    },
+    "observations": []
+  }
 }

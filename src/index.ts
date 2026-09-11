@@ -55,6 +55,9 @@ export type { Rule, RuleContext, FindingInit } from './rule.ts'
 export { SCANNER_VERSION, scan, scanDirectory } from './scanner.ts'
 export type { ScanOptions } from './scanner.ts'
 
+export { analysisInputDigest } from './identity.ts'
+export type { AnalysisInput } from './identity.ts'
+
 export { renderBadge } from './badge.ts'
 export type { ShieldsEndpointBadge } from './badge.ts'
 
