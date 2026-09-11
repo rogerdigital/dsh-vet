@@ -91,6 +91,12 @@ service is involved:
 ```
 
 Every run uploads the full report as an artifact; PRs get a single
+comment, edited in place. Set `baseline-report` to a report scanned from
+the merge base and PRs additionally show what changed since it — see
+[comparing releases](action/README.md#comparing-releases) for the
+trusted-baseline recipe, and the
+[pilot record](docs/release-risk-pilot.md) for how the comparison
+behaved on real release pairs.
 edited-in-place findings comment. Badge snippet and all inputs:
 [`action/README.md`](action/README.md). The `dsh-vet badge <report.json>`
 command renders the shields endpoint JSON if you wire CI yourself.

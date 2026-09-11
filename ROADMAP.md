@@ -163,14 +163,24 @@ emitter verified; contract frozen.
 
 ## Cross-cutting disciplines
 
-### Proposed release and upgrade risk review work
+### Release and upgrade risk review work
 
 The [release-risk development plan](docs/superpowers/plans/2026-09-10-release-risk-development-plan.md)
-defines a proposed extension of the existing static report workflow: scan
-context and coverage, comparable release reports, and PR risk-change summaries
-first; policy, artifact matching, and calibration follow through separate
-milestone gates. Implementation has not started. This plan does not replace
-the v0.3 adoption and contract-freeze criteria above.
+extends the existing static report workflow: scan context and coverage,
+comparable release reports, and PR risk-change summaries first; policy,
+artifact matching, and calibration follow through separate milestone
+gates. This work does not replace the v0.3 adoption and contract-freeze
+criteria above.
+
+**Status — M0/M1 implemented; pilot internal only.** Scan context
+(`x-dsh-vet` v1), content identity, stable observations and finding
+identities, `dsh-vet diff` (`dsh-vet/diff/v1`), coverage-qualified
+output, and the optional Action `baseline-report` comparison are
+implemented and tested. The [pilot record](docs/release-risk-pilot.md)
+covers two real release pairs reconciled against code evidence.
+**External maintainer feedback is pending — this is not adoption, and
+the M2 entry gate (repeated pilot use showing review friction) is not
+met.** The plan's later milestones keep their entry gates.
 
 - **Determinism is a product feature**, not a test detail: sorted findings,
   derived summary, no ambient state beyond `scanner.ranAt`.
