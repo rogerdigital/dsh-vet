@@ -59,12 +59,55 @@ the committed report.
 | `fail-on` | — | Override the strict threshold (`critical\|high\|medium\|low`) |
 | `rules` | — | Comma-separated rule ids to run (default: all) |
 | `comment` | `true` | Comment findings on pull requests |
+| `baseline-report` | — | Path to a baseline report to compare against; see [Comparing releases](#comparing-releases) |
 | `commit-report` | `false` | Commit report + badge on pushes to the default branch |
 | `github-token` | `github.token` | Token used for PR comments |
 
 **Consumers only need to pin the action ref.** Add a Dependabot config
 (`package-ecosystem: github-actions`) and ref updates arrive as PRs — no
 per-release edits to your workflow.
+
+## Comparing releases
+
+`baseline-report` adds an informational delta summary (added / removed /
+changed findings by stable identity, behavior-observation deltas) to the
+PR comment and the job summary; the full `dsh-vet/diff/v1` result is
+uploaded as `diff.json` inside the report artifact. The summary never
+gates a release in this mode — policy thresholds arrive with a later
+version.
+
+**The baseline must come from a trusted base revision.** A checked-in
+path controlled by the PR head is not authoritative: a malicious PR
+could edit the baseline to hide its own additions. Obtain it from the
+merge base, outside the workspace the PR controls:
+
+```yaml
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Scan the base revision into a file the PR cannot influence.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - run: npx -y dsh-vet@0.3.0 --json . > "$RUNNER_TEMP/base.report.json"
+
+      # 2. Back to the PR head, then audit with the baseline attached.
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+      - uses: rogerdigital/dsh-vet/action@v0.3.0
+        with:
+          specifier: '.'
+          baseline-report: ${{ runner.temp }}/base.report.json
+```
+
+Recovery when a baseline is missing or unusable: unset `baseline-report`
+to return to scan-only mode while you fix the pipeline — a run with a
+configured baseline that cannot produce a comparison fails after
+uploading the report, so the gap is visible rather than silent. The
+comparison is informational; the scan report is always preserved and
+published by its own rules.
 
 ## Notes
 
