@@ -50,8 +50,35 @@ honesty.
 
 ## Registry
 
-| Emitter | Verified versions | Rules | Notes |
-|---|---|---|---|
-| [`dsh-vet`](https://github.com/rogerdigital/dsh-vet) | 0.1.0 – | [`docs/rules/`](rules/) | the reference emitter; self-audited in [`examples/`](../examples/) |
+Three separate claims, listed separately. Meeting one never implies
+another — structural conformance says nothing about detection quality,
+and neither says who ran the scanner.
 
-Third-party emitters: none yet — the slot is open.
+### 1. Structural conformance
+
+Checklist items 1, 2, 4, and 7 above: builds through `createReport()` or
+publishes reports that pass `dsh-vet validate`, deterministic output,
+evidence on every finding, honest `scanner` fields.
+
+| Emitter | Verified versions | Evidence |
+|---|---|---|
+| [`dsh-vet`](https://github.com/rogerdigital/dsh-vet) | 0.1.0 – | every committed report validates on every CI run; conformance corpus in `test/fixtures/conformance/` |
+
+### 2. Detection calibration
+
+Emitters that have run the public
+[calibration corpus](calibration-method.md) and published their per-case
+results. Structural conformance cannot detect omitted findings; running
+the corpus in public is the closest honest substitute available today.
+
+| Emitter | Rule catalog revision | Corpus results |
+|---|---|---|
+| `dsh-vet` | 0.4.0 | [corpus table](calibration-method.md#the-corpus), locked by `test/calibration.test.ts` |
+
+### 3. Origin verification
+
+Who produced a given report, and whether it applies to the artifact at
+hand. Not yet defined — it ships with consumer artifact matching. No
+emitter is listed; when the definition exists, so will the checklist.
+
+Third-party emitters: none yet in any tier — the slots are open.
