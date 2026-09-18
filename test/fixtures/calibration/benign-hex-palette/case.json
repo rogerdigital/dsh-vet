@@ -1,0 +1,11 @@
+{
+  "id": "benign-hex-palette",
+  "kind": "benign",
+  "source": "synthetic; shape from the dsh-better-sidebar@0.17.1 palette false positive (docs/calibration-v0.1.md, tuning 1)",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "0.1.0",
+  "expectedGrade": "A",
+  "forbiddenRules": ["obf.encoded-payload"],
+  "rationale": "Long hex literals built from few distinct digits are color tables or repeated-tile data, not encodings. Flagging them damaged a real author's report; the v0.1 sweep tuned this rule so these stay silent.",
+  "limitations": "Charset statistics cannot distinguish a genuinely encoded payload that happens to reuse digits; such a payload stays unflagged at this threshold. The paired detection case locks the other side."
+}

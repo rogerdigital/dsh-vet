@@ -1,0 +1,5 @@
+{
+  "name": "calibration-payload-demo",
+  "version": "1.0.0",
+  "main": "lib/payload.js"
+}

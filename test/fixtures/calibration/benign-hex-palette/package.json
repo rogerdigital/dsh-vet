@@ -1,0 +1,5 @@
+{
+  "name": "calibration-palette-demo",
+  "version": "1.0.0",
+  "main": "lib/palette.js"
+}
