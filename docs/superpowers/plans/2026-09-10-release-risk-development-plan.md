@@ -1,6 +1,6 @@
 # Release and Upgrade Risk Review Development Plan
 
-**Status:** Proposed; implementation has not started.
+**Status:** M0/M1 shipped in [0.4.0](https://github.com/rogerdigital/dsh-vet/releases/tag/v0.4.0); pilot recorded in `docs/release-risk-pilot.md`; M2/M3 gated. M4 is expanded into its own plan: [`2026-09-19-calibration-conformance-kit.md`](2026-09-19-calibration-conformance-kit.md).
 **Date:** 2026-09-10
 **Goal:** Make every plugin release review explain which artifact was checked, the limits of that check, and the risk-relevant changes since the previous release.
 **Architecture:** Extend the existing static pipeline and report envelope without changing v1 grading. Build comparison and policy evaluation as separate pure consumers of reports; reuse the CLI, renderer, and GitHub Action for delivery.
@@ -158,12 +158,12 @@ These packages are intended as small ordered pull requests. Within each code tas
 
 **Modify:** `docs/dsh-vet-v1.md`, `docs/adopt-marketplace.md`, `docs/emitters.md`, `test/contract.test.ts`, `test/validate.test.ts`.
 
-- [ ] Run `pnpm typecheck` and `pnpm test`; record failures before editing.
-- [ ] Correct the A/B documentation contradiction using existing `gradeFor()` behavior.
-- [ ] Document structural conformance versus completeness, identity, and origin verification.
-- [ ] Preserve an old report without extensions as a compatibility fixture under `test/fixtures/release-risk/`.
-- [ ] Assert old reports still validate, low-confidence findings do not lower grades, and graded low findings yield B.
-- [ ] Validate with `pnpm exec vitest run test/contract.test.ts test/validate.test.ts`.
+- [x] Run `pnpm typecheck` and `pnpm test`; record failures before editing.
+- [x] Correct the A/B documentation contradiction using existing `gradeFor()` behavior.
+- [x] Document structural conformance versus completeness, identity, and origin verification.
+- [x] Preserve an old report without extensions as a compatibility fixture under `test/fixtures/release-risk/`.
+- [x] Assert old reports still validate, low-confidence findings do not lower grades, and graded low findings yield B.
+- [x] Validate with `pnpm exec vitest run test/contract.test.ts test/validate.test.ts`.
 
 Suggested commit: `docs: clarify report grading and validation guarantees`.
 
@@ -172,11 +172,11 @@ Suggested commit: `docs: clarify report grading and validation guarantees`.
 **Create:** `src/scan-context.ts`, `test/scan-context.test.ts`, `docs/scan-context-v1.md`.
 **Modify:** `src/contract.ts`, `src/validate.ts`, `src/index.ts`, `test/validate.test.ts`.
 
-- [ ] Specify extension fields, digest encodings, profile contents, omissions, and coverage invariants from section 4.
-- [ ] Add fixtures for absent context, supported context, malformed counts, duplicate rule IDs, and unsupported future context.
-- [ ] Implement extension types and pure validation helpers without changing legacy grade derivation.
-- [ ] Confirm unknown vendor fields remain tolerated while malformed known context is rejected.
-- [ ] Validate with `pnpm exec vitest run test/scan-context.test.ts test/validate.test.ts test/contract.test.ts`.
+- [x] Specify extension fields, digest encodings, profile contents, omissions, and coverage invariants from section 4.
+- [x] Add fixtures for absent context, supported context, malformed counts, duplicate rule IDs, and unsupported future context.
+- [x] Implement extension types and pure validation helpers without changing legacy grade derivation.
+- [x] Confirm unknown vendor fields remain tolerated while malformed known context is rejected.
+- [x] Validate with `pnpm exec vitest run test/scan-context.test.ts test/validate.test.ts test/contract.test.ts`.
 
 Suggested commit: `feat: define versioned scan context`.
 
@@ -185,12 +185,12 @@ Suggested commit: `feat: define versioned scan context`.
 **Create:** `src/identity.ts`, `test/identity.test.ts`.
 **Modify:** `src/analyze.ts`, `src/resolve.ts`, `src/scanner.ts`, `test/analyze.test.ts`, `test/resolve.test.ts`, `test/scanner.test.ts`.
 
-- [ ] Add controlled targets for parse failure, missing entry, zero JS, selected rules, skipped link, and a Node-shebang executable.
-- [ ] Capture analysis input bytes once and generate the versioned manifest digest from those snapshots.
-- [ ] Add the exact archive digest while retaining registry integrity verification.
-- [ ] Carry extraction omissions and effective rule selection into scan context; include automatic empty-audit execution.
-- [ ] Test deterministic digests across different roots, a changed JS byte, changed package metadata, and README-only changes.
-- [ ] Validate with `pnpm exec vitest run test/identity.test.ts test/analyze.test.ts test/resolve.test.ts test/scanner.test.ts`.
+- [x] Add controlled targets for parse failure, missing entry, zero JS, selected rules, skipped link, and a Node-shebang executable.
+- [x] Capture analysis input bytes once and generate the versioned manifest digest from those snapshots.
+- [x] Add the exact archive digest while retaining registry integrity verification.
+- [x] Carry extraction omissions and effective rule selection into scan context; include automatic empty-audit execution.
+- [x] Test deterministic digests across different roots, a changed JS byte, changed package metadata, and README-only changes.
+- [x] Validate with `pnpm exec vitest run test/identity.test.ts test/analyze.test.ts test/resolve.test.ts test/scanner.test.ts`.
 
 Suggested commit: `feat: record scan coverage and content identity`.
 
@@ -199,11 +199,11 @@ Suggested commit: `feat: record scan coverage and content identity`.
 **Create:** `src/observations.ts`, `test/observations.test.ts`.
 **Modify:** `src/analyze.ts`, `src/rule.ts`, `src/rules/perm.ts`, `src/rules/dep.ts`, `src/rules/obf.ts`, `src/rules/egress.ts`, `src/scanner.ts`.
 
-- [ ] Define per-rule identity subjects for all shipped finding types; record unsupported cases explicitly.
-- [ ] Add paired fixtures for line insertion, formatting changes, a second host, repeated identical calls, and increased confidence.
-- [ ] Derive observations from existing analysis; do not run an additional source parser.
-- [ ] Add a secret-bearing URL fixture and assert emitted identity/observation fields omit credentials and query values.
-- [ ] Validate with `pnpm exec vitest run test/observations.test.ts test/scanner.test.ts`.
+- [x] Define per-rule identity subjects for all shipped finding types; record unsupported cases explicitly.
+- [x] Add paired fixtures for line insertion, formatting changes, a second host, repeated identical calls, and increased confidence.
+- [x] Derive observations from existing analysis; do not run an additional source parser.
+- [x] Add a secret-bearing URL fixture and assert emitted identity/observation fields omit credentials and query values.
+- [x] Validate with `pnpm exec vitest run test/observations.test.ts test/scanner.test.ts`.
 
 Suggested commit: `feat: emit stable risk observations`.
 
@@ -212,12 +212,12 @@ Suggested commit: `feat: emit stable risk observations`.
 **Create:** `src/compare.ts`, `test/compare.test.ts`, `docs/report-diff-v1.md`.
 **Modify:** `src/index.ts`.
 
-- [ ] Specify the diff result and reason codes before exposing the public API.
-- [ ] Add tests for every comparability condition and for additions, removals, matched changes, and repeated subjects.
-- [ ] Implement deterministic matching with explicit per-subject counts and both sides of changed findings.
-- [ ] Prove line movement does not create risk additions and that unchanged grades do not hide new observations.
-- [ ] Freeze inputs in tests and assert the comparator does not mutate either report.
-- [ ] Validate with `pnpm exec vitest run test/compare.test.ts`.
+- [x] Specify the diff result and reason codes before exposing the public API.
+- [x] Add tests for every comparability condition and for additions, removals, matched changes, and repeated subjects.
+- [x] Implement deterministic matching with explicit per-subject counts and both sides of changed findings.
+- [x] Prove line movement does not create risk additions and that unchanged grades do not hide new observations.
+- [x] Freeze inputs in tests and assert the comparator does not mutate either report.
+- [x] Validate with `pnpm exec vitest run test/compare.test.ts`.
 
 Suggested commit: `feat: compare compatible audit reports`.
 
@@ -226,11 +226,11 @@ Suggested commit: `feat: compare compatible audit reports`.
 **Create:** `src/render-diff.ts`, `test/render-diff.test.ts`.
 **Modify:** `src/cli.ts`, `src/render.ts`, `src/badge.ts`, `src/index.ts`, `test/cli.test.ts`, `test/render.test.ts`, `test/badge.test.ts`, `README.md`.
 
-- [ ] Implement the three CLI forms and exit-code table in section 4.5.
-- [ ] Add human/JSON tests for success, incomparable inputs, invalid reports, missing files, and wrong argument count.
-- [ ] Show coverage alongside grade, including unknown coverage on old reports.
-- [ ] Escape file names, titles, and host text; visibly disclose truncated output.
-- [ ] Validate with `pnpm exec vitest run test/cli.test.ts test/render.test.ts test/render-diff.test.ts test/badge.test.ts`.
+- [x] Implement the three CLI forms and exit-code table in section 4.5.
+- [x] Add human/JSON tests for success, incomparable inputs, invalid reports, missing files, and wrong argument count.
+- [x] Show coverage alongside grade, including unknown coverage on old reports.
+- [x] Escape file names, titles, and host text; visibly disclose truncated output.
+- [x] Validate with `pnpm exec vitest run test/cli.test.ts test/render.test.ts test/render-diff.test.ts test/badge.test.ts`.
 
 Suggested commit: `feat: expose release risk comparison in the CLI`.
 
@@ -239,12 +239,12 @@ Suggested commit: `feat: expose release risk comparison in the CLI`.
 **Modify:** `action/action.yml`, `action/scripts/post-results.mjs`, `action/scripts/render.mjs`, `action/scripts/render.d.mts`, `action/README.md`, `test/action-render.test.ts`, `test/render.test.ts`.
 **Create:** `test/action-comparison.test.ts`.
 
-- [ ] Add `baseline-report`, optional comparison invocation, diff artifact upload, and status propagation.
-- [ ] Preserve existing scan-only inputs and the single-comment marker.
-- [ ] Add a recipe for obtaining a baseline from a pinned trusted base revision; explain missing-baseline recovery.
-- [ ] Cover no baseline, invalid baseline, profile mismatch, permission-denied commenting, and a threshold-failed scan that still produced a valid report.
-- [ ] Keep scan and comparison failure handling distinct; do not publish an invalid report as a success badge.
-- [ ] Validate with `pnpm exec vitest run test/action-comparison.test.ts test/action-render.test.ts test/render.test.ts`; run `actionlint` for workflow changes.
+- [x] Add `baseline-report`, optional comparison invocation, diff artifact upload, and status propagation.
+- [x] Preserve existing scan-only inputs and the single-comment marker.
+- [x] Add a recipe for obtaining a baseline from a pinned trusted base revision; explain missing-baseline recovery.
+- [x] Cover no baseline, invalid baseline, profile mismatch, permission-denied commenting, and a threshold-failed scan that still produced a valid report.
+- [x] Keep scan and comparison failure handling distinct; do not publish an invalid report as a success badge.
+- [x] Validate with `pnpm exec vitest run test/action-comparison.test.ts test/action-render.test.ts test/render.test.ts`; run `actionlint` for workflow changes.
 
 Suggested commit: `feat: summarize release risk changes in pull requests`.
 
@@ -253,13 +253,13 @@ Suggested commit: `feat: summarize release risk changes in pull requests`.
 **Modify:** `test/golden.test.ts`, affected `fixtures/*/expected.report.json`, `README.md`, `ROADMAP.md`.
 **Create:** `docs/release-risk-pilot.md` and controlled report pairs under `test/fixtures/release-risk/`.
 
-- [ ] Make missing golden files fail ordinary verification; updates require the explicit update command.
-- [ ] Run `pnpm test:update-goldens` only after reviewing intended report additions; inspect every resulting diff.
-- [ ] Run `pnpm verify` and inspect package contents for new library exports, types, and documentation.
-- [ ] Run built CLI help, two controlled fixture scans, diff, validate, and badge through `node bin/dsh-vet.mjs`.
-- [ ] Exercise a real package release pair with the same scanner/profile and manually reconcile every reported addition with code evidence.
-- [ ] Record one external maintainer's feedback when available; do not mark external adoption complete based on an internal demonstration.
-- [ ] Keep implementation completion separate from pilot/adoption status in the roadmap.
+- [x] Make missing golden files fail ordinary verification; updates require the explicit update command.
+- [x] Run `pnpm test:update-goldens` only after reviewing intended report additions; inspect every resulting diff.
+- [x] Run `pnpm verify` and inspect package contents for new library exports, types, and documentation.
+- [x] Run built CLI help, two controlled fixture scans, diff, validate, and badge through `node bin/dsh-vet.mjs`.
+- [x] Exercise a real package release pair with the same scanner/profile and manually reconcile every reported addition with code evidence.
+- [x] Record one external maintainer's feedback when available; do not mark external adoption complete based on an internal demonstration.
+- [x] Keep implementation completion separate from pilot/adoption status in the roadmap.
 
 Suggested commit: `test: validate release risk review end to end`.
 
@@ -377,8 +377,8 @@ Release new context and comparison as additive functionality. Do not mass-regene
 
 ## 10. Completion and product checkpoints
 
-- [ ] M0: documentation and baseline compatibility verified.
-- [ ] M1: all acceptance rows covered; CLI and Action package checks pass.
+- [x] M0: documentation and baseline compatibility verified.
+- [x] M1: all acceptance rows covered; CLI and Action package checks pass.
 - [ ] Pilot: one real release pair manually reconciled; record review effort and noisy deltas.
 - [ ] External feedback: record at least one maintainer's experience when available.
 - [ ] M2 decision: proceed only if trusted-baseline comparison is useful and exception handling solves observed friction.

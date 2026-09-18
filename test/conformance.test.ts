@@ -8,7 +8,7 @@ import { compareReports } from '../src/compare.ts'
 import { renderMarkdown } from '../src/render.ts'
 
 const DIR = fileURLToPath(new URL('../test/fixtures/conformance', import.meta.url))
-const load = (name: string): object => JSON.parse(readFileSync(join(DIR, name), 'utf8'))
+const load = (name: string) => JSON.parse(readFileSync(join(DIR, name), 'utf8'))
 
 describe('conformance corpus', () => {
   it('legacy report: valid, unknown coverage, never comparison metadata', () => {

@@ -7,7 +7,7 @@ import { validateReport, coverageOf, renderMarkdown } from '../src/index.ts'
 
 const api = { validateReport, coverageOf, renderMarkdown }
 const DIR = fileURLToPath(new URL('../test/fixtures/conformance', import.meta.url))
-const load = (name: string): object => JSON.parse(readFileSync(join(DIR, name), 'utf8'))
+const load = (name: string) => JSON.parse(readFileSync(join(DIR, name), 'utf8'))
 
 describe('consumer example', () => {
   it('valid report: coverage visible, markdown rendered, applicability honestly unsupported', () => {
