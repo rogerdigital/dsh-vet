@@ -1,0 +1,5 @@
+{
+  "name": "calibration-charcode-demo",
+  "version": "1.0.0",
+  "main": "lib/buildhost.js"
+}

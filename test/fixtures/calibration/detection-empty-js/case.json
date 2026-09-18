@@ -1,0 +1,11 @@
+{
+  "id": "detection-empty-js",
+  "kind": "detection",
+  "source": "synthetic; the activation finding from the v0.2 action rollout — a TS source tree scanned as '.' graded A while auditing nothing (CHANGELOG 0.2.1)",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "0.2.1",
+  "expectedGrade": "C",
+  "expectedFindings": [{ "rule": "scan.empty-audit", "file": "." }],
+  "rationale": "A report over zero analyzable files is not a clean report. The automatic empty-audit finding fires at medium/high and grades C, telling the user to audit what actually ships.",
+  "limitations": "Directory scans only; npm-resolution scans cannot be empty (a tarball always contains package.json)."
+}

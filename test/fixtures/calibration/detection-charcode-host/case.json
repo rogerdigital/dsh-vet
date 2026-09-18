@@ -1,0 +1,11 @@
+{
+  "id": "detection-charcode-host",
+  "kind": "detection",
+  "source": "synthetic; the classic charcode-chain shape the rule exists for",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "0.1.0",
+  "expectedGrade": "C",
+  "expectedFindings": [{ "rule": "obf.charcode-chain", "file": "lib/buildhost.js" }],
+  "rationale": "Building strings from character codes hides content from every text-based review tool; medium severity at medium confidence grades C by design.",
+  "limitations": "The evidence note shows a bounded prefix of the decoded text, not the full string."
+}

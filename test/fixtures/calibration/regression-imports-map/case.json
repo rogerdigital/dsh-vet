@@ -1,0 +1,12 @@
+{
+  "id": "regression-imports-map",
+  "kind": "regression",
+  "source": "synthetic; from the chalk@5.3.0 pilot reconciliation (docs/release-risk-pilot.md) — vendored files reached only through the package.json imports map read as unreachable",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "unreleased",
+  "expectedGrade": "A",
+  "expectedFindings": [{ "rule": "perm.unreachable-files", "file": "vendor/support/browser.js" }],
+  "absentFindings": [{ "rule": "perm.unreachable-files", "file": "vendor/support/index.js" }],
+  "rationale": "A file resolved through the node condition of the # subpath imports map is reachable and must not be flagged; the sibling reachable only via the default condition (browser-only) genuinely is unreachable from a Node entry. The pre-fix behavior produced false positives on every package that vendors this way; 'since' is 'unreleased' until the fix ships in a version, then bumped in the same PR as the release.",
+  "limitations": "Only the node/default conditions are resolved; exotic custom conditions still read as unreachable."
+}
