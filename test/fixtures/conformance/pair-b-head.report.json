@@ -1,0 +1,106 @@
+{
+  "schema": "dsh-vet/v1",
+  "target": {
+    "kind": "local-path",
+    "specifier": "<conformance:pair-b-head>"
+  },
+  "scanner": {
+    "name": "dsh-vet",
+    "version": "0.4.0",
+    "ranAt": "2026-01-01T00:00:00.000Z"
+  },
+  "summary": {
+    "grade": "A",
+    "counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "info": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "perm.network-client",
+      "title": "Opens network connections",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "index.js",
+          "line": 8,
+          "snippet": "const res = await fetch('https://api.example.com/v1/status')",
+          "note": "seam \"web\" is declared"
+        }
+      ],
+      "remediation": "Declare the web seam in dsh.seams, or drop the network access.",
+      "references": [
+        "https://github.com/rogerdigital/dsh-vet/blob/main/docs/rules/perm.network-client.md"
+      ]
+    }
+  ],
+  "x-dsh-vet": {
+    "version": 1,
+    "profile": {
+      "analyzerRevision": "dsh-vet-analyzer/0.4.0",
+      "ruleCatalogRevision": "dsh-vet-rules/0.4.0",
+      "rules": [
+        "perm.network-client",
+        "scan.empty-audit"
+      ],
+      "options": {},
+      "digest": "sha256:fd4170ae553e85fcb96086dba7bdd5ddaef518dcfc14af695d4edfb158512bd1"
+    },
+    "coverage": {
+      "status": "partial",
+      "candidateJs": 1,
+      "parsed": 1,
+      "parseFailures": 0,
+      "failedFiles": [],
+      "entries": {
+        "resolved": [
+          "index.js"
+        ],
+        "unresolved": []
+      },
+      "omissions": [],
+      "dependencyMode": "not-scanned",
+      "limitations": [
+        "dependencies are not scanned",
+        "non-JavaScript files and executables are not analyzed",
+        "static analysis cannot observe runtime-computed behavior"
+      ]
+    },
+    "subject": {
+      "packageName": "dsh-clean-demo",
+      "analysisInputDigest": "sha256:a0ed3156ffc52e5140fe95570d03cc05df3909bcb922445c1a25d05aee1adf40",
+      "digestKind": "dsh-vet/analysis-input@1"
+    },
+    "observations": [
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "fs"
+      },
+      {
+        "kind": "capability",
+        "file": "index.js",
+        "subject": "net"
+      },
+      {
+        "kind": "outbound-host",
+        "file": "index.js",
+        "subject": "api.example.com"
+      }
+    ],
+    "findingIdentities": [
+      {
+        "rule": "perm.network-client",
+        "variant": "client",
+        "file": "index.js",
+        "subject": "api.example.com",
+        "finding": 0
+      }
+    ]
+  }
+}
