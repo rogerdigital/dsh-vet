@@ -1,0 +1,5 @@
+{
+  "name": "calibration-exfil-demo",
+  "version": "1.0.0",
+  "main": "lib/report.js"
+}

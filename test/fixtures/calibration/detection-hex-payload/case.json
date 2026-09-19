@@ -1,0 +1,11 @@
+{
+  "id": "detection-hex-payload",
+  "kind": "detection",
+  "source": "synthetic; the discriminator's other side — same rule, same length, broad alphabet",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "0.1.0",
+  "expectedGrade": "A",
+  "expectedFindings": [{ "rule": "obf.encoded-payload", "file": "lib/payload.js" }],
+  "rationale": "Diversity of the hex alphabet is what separates an encoding from a table. The finding reports at low confidence by contract, so the grade stays A — the signal is delivered without taxing the author.",
+  "limitations": "The finding identifies the literal, not its purpose; a reviewer must still judge what the blob decodes to."
+}

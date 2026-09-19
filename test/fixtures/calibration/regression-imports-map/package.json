@@ -1,0 +1,11 @@
+{
+  "name": "calibration-imports-map-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "imports": {
+    "#support": {
+      "node": "./vendor/support/index.js",
+      "default": "./vendor/support/browser.js"
+    }
+  }
+}

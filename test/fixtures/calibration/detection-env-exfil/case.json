@@ -1,0 +1,15 @@
+{
+  "id": "detection-env-exfil",
+  "kind": "detection",
+  "source": "synthetic; the secret-adjacent egress shape observed across the v0.1 sweep (bundled UIs reading process.env next to fetch)",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "0.1.0",
+  "expectedGrade": "D",
+  "expectedFindings": [
+    { "rule": "perm.network-client", "file": "lib/report.js" },
+    { "rule": "egress.outbound-endpoints", "file": "lib/report.js" },
+    { "rule": "egress.secret-adjacent", "file": "lib/report.js" }
+  ],
+  "rationale": "An undeclared outbound client grades C on its own; when a network call is statically reachable from a secret read, egress.secret-adjacent escalates to high severity at medium confidence and the grade becomes D — the one shape where co-occurrence is graded, because reachability is proven, not presumed.",
+  "limitations": "Reachability from the read is not proof of exfiltration; the rule names the file, line, and host and lets the reviewer ask the question."
+}

@@ -1,0 +1,15 @@
+{
+  "id": "transform-format-variant",
+  "kind": "transform-variant",
+  "compareWith": "transform-format-base",
+  "source": "synthetic; the M1 design promise 'line moves and reformatting are not risk additions', locked as data",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "0.4.0",
+  "expectedGrade": "C",
+  "expectedFindings": [
+    { "rule": "perm.network-client", "file": "lib/store.js" },
+    { "rule": "egress.outbound-endpoints", "file": "lib/store.js" }
+  ],
+  "rationale": "Comments, blank lines, and argument wrapping move every line number but change no semantic subject. The diff against the base must be comparable with zero added, removed, or changed findings — formatting churn must never read as new risk.",
+  "limitations": "A file rename would legitimately appear as remove+add; rename inference is explicitly not promised (M1 design)."
+}

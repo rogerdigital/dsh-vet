@@ -183,9 +183,18 @@ external ask went to three plugin authors on 2026-09-11
 [dsh-wechat](https://github.com/pan17/dsh-wechat/issues/7),
 [dsh-find-plugin](https://github.com/awesome-dsh-plugin/dsh-find-plugin/issues/11))
 plus the [#1115 follow-up](https://github.com/deepseek-ai/deepseek-harness/discussions/1115#discussioncomment-18402967).
-**No maintainer has replied yet — this is not adoption, and
-the M2 entry gate (repeated pilot use showing review friction) is not
-met.** The plan's later milestones keep their entry gates.
+**One maintainer replied and used the comparison once — dsh-wechat,
+validated against release intent, second release still pending
+([pilot record](docs/release-risk-pilot.md)) — which is not adoption,
+and the M2 entry gate (repeated pilot use showing review friction) is
+not met.** The plan's later milestones keep their entry gates.
+
+The M4 public kit landed next: the calibration corpus and method
+(`docs/calibration-method.md`), the structural conformance corpus and
+consumer guide (`docs/consumer-conformance.md`, `examples/consumer/`),
+and the three-claim emitter registry (`docs/emitters.md`). The parent
+plan's M4 bullet 7 — exercising the kit with one external maintainer or
+marketplace — remains outreach, gated on a separate authorized action.
 
 - **Determinism is a product feature**, not a test detail: sorted findings,
   derived summary, no ambient state beyond `scanner.ranAt`.

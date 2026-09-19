@@ -1,0 +1,14 @@
+{
+  "id": "transform-format-base",
+  "kind": "transform-base",
+  "source": "synthetic; baseline of the identity-stability pair",
+  "license": "MIT — synthetic fixture; no upstream code copied",
+  "since": "0.4.0",
+  "expectedGrade": "C",
+  "expectedFindings": [
+    { "rule": "perm.network-client", "file": "lib/store.js" },
+    { "rule": "egress.outbound-endpoints", "file": "lib/store.js" }
+  ],
+  "rationale": "Base of the formatting-variant pair: an undeclared API client, graded C, whose finding identities must survive reformatting unchanged.",
+  "limitations": "Locks identity stability for finding subjects only; observation deltas are asserted in the variant case."
+}
